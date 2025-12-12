@@ -1,8 +1,8 @@
 package Gedcom_elements;
 
-public class tagSexe extends gedcomEntity{
+public class TagSexe extends GedcomEntity{
 
-    public tagSexe(String value) {
+    public TagSexe(String value) {
         super(1,"SEXE",value,null);
     }
 

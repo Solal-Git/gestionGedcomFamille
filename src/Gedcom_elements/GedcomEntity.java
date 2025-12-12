@@ -2,14 +2,14 @@ package Gedcom_elements;
 
 import java.io.Serializable;
 
-public abstract class gedcomEntity implements Serializable {
+public abstract class GedcomEntity implements Serializable {
     protected String ID;        //id de l'entité
     protected String tag;       //famille ou individu ou autre tag
     protected int level;        //Niveau dans le fichier gedcom
     protected String value ;    //Information du noeud
 
 
-    public gedcomEntity(int level,String tag, String value,String ID ) {
+    public GedcomEntity(int level,String tag, String value,String ID ) {
         this.ID = ID;
         this.tag = tag;
         this.level = level;
