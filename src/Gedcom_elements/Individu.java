@@ -19,8 +19,12 @@ public class Individu extends GedcomEntity {
         this.proprietes.add(prop);
     }
 
-    public void setFamc(String id) { this.idFamilleChild = id; }
-    public void ajouterFams(String id) { this.idsFamilles.add(id); }
+    public void setFamc(String id) {
+        this.idFamilleChild = id;
+    }
+    public void ajouterFams(String id) {
+        this.idsFamilles.add(id);
+    }
 
     @Override
     public String toString() {

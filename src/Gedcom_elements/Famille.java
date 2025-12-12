@@ -14,8 +14,12 @@ public class Famille extends GedcomEntity {
         this.idsEnfants = new ArrayList<>();
     }
 
-    public void setMari(String id) { this.idMari = id; }
-    public void setFemme(String id) { this.idFemme = id; }
+    public void setMari(String id) {
+        this.idMari = id;
+    }
+    public void setFemme(String id) {
+        this.idFemme = id;
+    }
 
     public void ajouterEnfant(String idEnfant) {
         this.idsEnfants.add(idEnfant);
@@ -23,7 +27,7 @@ public class Famille extends GedcomEntity {
 
     @Override
     public String toString() {
-        return "Famille " + id + " (Mari: " + idMari + ", Femme: " + idFemme + ")";
+        return "Famille " + ID + " (Mari: " + idMari + ", Femme: " + idFemme + ")";
     }
 }
 

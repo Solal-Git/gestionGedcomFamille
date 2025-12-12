@@ -16,10 +16,18 @@ public abstract class GedcomEntity implements Serializable {
         this.value = value;
     }
 
-    public String getID() {return this.ID;}
-    public String getTag() {return this.tag;}
-    public String getValue() {return this.value;}
-    public int getLevel() {return this.level;}
+    public String getID() {
+        return this.ID;
+    }
+    public String getTag() {
+        return this.tag;
+    }
+    public String getValue() {
+        return this.value;
+    }
+    public int getLevel() {
+        return this.level;
+    }
 
     public abstract String toString();
 }

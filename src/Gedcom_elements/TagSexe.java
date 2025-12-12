@@ -8,7 +8,11 @@ public class TagSexe extends GedcomEntity{
 
     @Override
     public String toString() {
-        if (value == "M") {return "il s'agit de Monsieur" + value ;}
-        else {return "il s'agit de Madame" + value; }
+        if (value == "M") {
+            return "il s'agit de Monsieur" + value ;
+        }
+        else {
+            return "il s'agit de Madame" + value;
+        }
     }
 }
