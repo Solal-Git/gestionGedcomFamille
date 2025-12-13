@@ -55,11 +55,6 @@ public class Individu extends GedcomEntity {
         this.famsIds.add(famsId);
     }
 
-    //Appelé par le lecteur
-    public void addPropriete(GedcomTag tag) {
-        tag.attributionIndividu(this);
-    }
-
     public void setName(TagName name) {
         this.nameTag = name;
     }
@@ -74,6 +69,10 @@ public class Individu extends GedcomEntity {
 
     public TagName getNameTag() {
         return nameTag;
+    }
+
+    public TagSexe getSexTag(){
+        return sexTag;
     }
 
     @Override

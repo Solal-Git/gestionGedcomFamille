@@ -30,7 +30,7 @@ public class GedcomGraph implements Serializable {
     // PARTIE VALIDATION ET LIAISON (LE COEUR DU PROJET)
     // =========================================================
 
-    public void construireEtValiderGraphe() {
+    public void construireEtValiderGraphe() throws TwiceChildException {
         System.out.println("Validation des données en cours...");
 
         // On parcourt tous les individus pour vérifier leurs liens parents (FAMC)
@@ -39,10 +39,10 @@ public class GedcomGraph implements Serializable {
             validerLiensConjoint(indiv);
         }
 
-        // si on veut ajouter detecterCycles() c'est ici
+        detecterCycles();
     }
 
-    private void validerLienEnfant(Individu indiv) {
+    private void validerLienEnfant(Individu indiv) throws TwiceChildException {
         String idFam = indiv.getFamcId();
         if (idFam == null) return; // Pas de parents connus, on passe
 
@@ -86,33 +86,6 @@ public class GedcomGraph implements Serializable {
             e.printStackTrace();
         }
     }
-
-    private void validerLiensConjoint(Individu indiv) {
-        for (String idFam : indiv.getFamsIds()) {
-            try {
-                Famille f = mapFamilles.get(idFam);
-                if (f == null) throw new RefMissingException(idFam);
-
-                indiv.addFamillePropreObj(f);
-
-                // Qui est cet individu dans la famille ? Mari ou Femme ?
-                if (indiv.getID().equals(f.getMariId())) {
-                    f.setMariObj(indiv);
-                } else if (indiv.getID().equals(f.getFemmeId())) {
-                    f.setFemmeObj(indiv);
-                }
-                // Si ni l'un ni l'autre, c'est une LinkIncoherent à gérer...
-
-            } catch (RefMissingException e) {
-                // Création famille manquante
-                Famille newF = new Famille(e.getIdManquant());
-                ajouterFamille(newF);
-                indiv.addFamillePropreObj(newF);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
     /**
      * Recherche un individu par son nom ou une partie de son nom.
      * Retourne le premier trouvé (ou null).
@@ -133,5 +106,76 @@ public class GedcomGraph implements Serializable {
             }
         }
         return null;
+    }
+    private void validerLiensConjoint(Individu indiv) {
+        for (String idFam : indiv.getFamsIds()) {
+            try {
+                Famille f = mapFamilles.get(idFam);
+                if (f == null) throw new RefMissingException(idFam);
+
+                indiv.addFamillePropreObj(f);
+
+                // --- AJOUT DE LA LOGIQUE GENRE ---
+                String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "?";
+
+                // Cas 1 : L'individu est listé comme le MARI
+                if (indiv.getID().equals(f.getMariId())) {
+                    if ("F".equals(sexe)) { // Si c'est une femme
+                        throw new GenderMissMatchException(" Incohérence: Une femme est déclarée comme Mari dans la famille " + f.getID(), null, indiv.getID(), sexe, "HUSB");
+                    }
+                    f.setMariObj(indiv);
+                }
+                // Cas 2 : L'individu est listé comme la FEMME
+                else if (indiv.getID().equals(f.getFemmeId())) {
+                    if ("M".equals(sexe)) { // Si c'est un homme
+                        throw new GenderMissMatchException(" Incohérence: Un homme est déclaré comme Femme dans la famille " + f.getID(), null, indiv.getID(), sexe, "WIFE");
+                    }
+                    f.setFemmeObj(indiv);
+                }
+
+            } catch (GenderMissMatchException e) {
+                System.err.println("ERREUR DE GENRE : " + e.getMessage());
+                // Correction : On laisse faire, ou on supprime le lien si on veut être strict
+            } catch (RefMissingException e) {
+                // ... (ton code existant) ...
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void detecterCycles() {
+        for (Individu indiv : mapIndividus.values()) {
+            try {
+                verifierAncetres(indiv, indiv, new ArrayList<>());
+            } catch (GenealogyException e) {
+                System.err.println("CYCLE DETECTÉ : " + e.getMessage());
+                // Correction radicale : on coupe le lien parent
+                indiv.setFamilleParentObj(null);
+            }
+        }
+    }
+
+    private void verifierAncetres(Individu cible, Individu courant, ArrayList<String> chemin) throws GenealogyException {
+        if (courant == null) return;
+        Famille f = courant.getFamilleParentObj(); // Utilise le lien OBJET
+        if (f != null) {
+            verifierParent(cible, f.getMariObj(), chemin);
+            verifierParent(cible, f.getFemmeObj(), chemin);
+        }
+    }
+
+    private void verifierParent(Individu cible, Individu parent, ArrayList<String> chemin) throws GenealogyException {
+        if (parent != null) {
+            if (parent.getID().equals(cible.getID())) {
+                throw new GenealogyException(chemin, " L'individu " + cible.getID() + " tourne en rond !");
+            }
+            // Pour éviter les boucles infinies de l'algo, on vérifie si on a déjà vu ce parent dans ce chemin
+            if (!chemin.contains(parent.getID())) {
+                ArrayList<String> nouveauChemin = new ArrayList<>(chemin);
+                nouveauChemin.add(parent.getID());
+                verifierAncetres(cible, parent, nouveauChemin);
+            }
+        }
     }
 }
