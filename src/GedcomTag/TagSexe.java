@@ -9,7 +9,7 @@ public class TagSexe extends GedcomTag {
     }
 
     @Override
-    public void attributionIndividu(GedcomEntity E) {
+    public void attribuateIndividu(GedcomEntity E) {
         if (E instanceof Individu I) {
             I.setSex(this);
         }

@@ -15,6 +15,7 @@ public abstract class GedcomEntity implements Serializable {
         this.level = level;
         this.value = value;
     }
+//============== Getter ==============
 
     public String getID() {
         return this.ID;
@@ -28,6 +29,6 @@ public abstract class GedcomEntity implements Serializable {
     public int getLevel() {
         return this.level;
     }
-
+    //====================================
     public abstract String toString();
 }

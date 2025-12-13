@@ -23,7 +23,7 @@ public class TagMultimedia extends GedcomTag {
     }
 
     @Override
-    public void attributionIndividu(GedcomEntity entity) {
+    public void attribuateIndividu(GedcomEntity entity) {
         if (entity instanceof Individu) {
             ((Individu) entity).setMultimedia(this);
         } else if (entity instanceof Famille) {

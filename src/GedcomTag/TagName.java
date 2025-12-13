@@ -9,7 +9,7 @@ public class TagName extends GedcomTag {
     }
 
     @Override
-    public void attributionIndividu(GedcomEntity E) {
+    public void attribuateIndividu(GedcomEntity E) {
         if (E instanceof Individu I) {
             I.setName(this);
         }

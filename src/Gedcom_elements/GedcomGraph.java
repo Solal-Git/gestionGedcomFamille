@@ -30,7 +30,7 @@ public class GedcomGraph implements Serializable {
     // PARTIE VALIDATION ET LIAISON (LE COEUR DU PROJET)
     // =========================================================
 
-    public void construireEtValiderGraphe() throws TwiceChildException {
+    public void construireEtValiderGraphe() throws TwiceChildException,GenealogyException {
         System.out.println("Validation des données en cours...");
 
         // On parcourt tous les individus pour vérifier leurs liens parents (FAMC)
@@ -39,7 +39,7 @@ public class GedcomGraph implements Serializable {
             validerLiensConjoint(indiv);
         }
 
-        detecterCycles();
+        findCycles();
     }
 
     private void validerLienEnfant(Individu indiv) throws TwiceChildException {
@@ -144,37 +144,39 @@ public class GedcomGraph implements Serializable {
         }
     }
 
-    private void detecterCycles() {
+    private void findCycles() throws GenealogyException {               //initialise toutes la recherche du cycle
         for (Individu indiv : mapIndividus.values()) {
-            try {
-                verifierAncetres(indiv, indiv, new ArrayList<>());
-            } catch (GenealogyException e) {
-                System.err.println("CYCLE DETECTÉ : " + e.getMessage());
-                // Correction radicale : on coupe le lien parent
-                indiv.setFamilleParentObj(null);
-            }
+            ArrayList<String> cheminInitial = new ArrayList<>();
+            cheminInitial.add(indiv.getID());
+            checkAncestors(indiv, indiv, cheminInitial);
         }
     }
 
-    private void verifierAncetres(Individu cible, Individu courant, ArrayList<String> chemin) throws GenealogyException {
+    private void checkAncestors(Individu cible, Individu courant, ArrayList<String> chemin) throws GenealogyException {
         if (courant == null) return;
-        Famille f = courant.getFamilleParentObj(); // Utilise le lien OBJET
+        Famille f = courant.getFamilleParentObj();                  //récupérer le pere et la mere de la famille
+
         if (f != null) {
-            verifierParent(cible, f.getMariObj(), chemin);
-            verifierParent(cible, f.getFemmeObj(), chemin);
+            checkParents(cible, f.getMariObj(), chemin);            // On vérifie le père
+            checkParents(cible, f.getFemmeObj(), chemin);           // On vérifie la mère
         }
     }
 
-    private void verifierParent(Individu cible, Individu parent, ArrayList<String> chemin) throws GenealogyException {
+    private void checkParents(Individu cible, Individu parent, ArrayList<String> chemin) throws GenealogyException {
         if (parent != null) {
-            if (parent.getID().equals(cible.getID())) {
-                throw new GenealogyException(chemin, " L'individu " + cible.getID() + " tourne en rond !");
+            try {
+                if (parent.getID().equals(cible.getID())) {
+                    chemin.add(parent.getID());                     //on ajt au chemin l'id si il est égale a l'id cible(donc cycle)
+                    throw new GenealogyException(chemin, "L'individu " + cible.getID() + " tourne en rond !");
+                }
+                if (!chemin.contains(parent.getID())) {
+                    ArrayList<String> nouveauChemin = new ArrayList<>(chemin);  //sinon on relance récursirvement avec un nouveau chemin et un nouvelle individu
+                    nouveauChemin.add(parent.getID());
+                    checkAncestors(cible, parent, nouveauChemin);
+                }
             }
-            // Pour éviter les boucles infinies de l'algo, on vérifie si on a déjà vu ce parent dans ce chemin
-            if (!chemin.contains(parent.getID())) {
-                ArrayList<String> nouveauChemin = new ArrayList<>(chemin);
-                nouveauChemin.add(parent.getID());
-                verifierAncetres(cible, parent, nouveauChemin);
+            catch (GenealogyException e) {
+                throw new GenealogyException(e.getCycle(), e.getMessage());         //récup l'erreur si il y a un cycle
             }
         }
     }

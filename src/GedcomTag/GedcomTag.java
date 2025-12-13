@@ -11,7 +11,7 @@ public abstract class GedcomTag extends GedcomEntity implements Serializable {
         super(level, tag, value, null);
     }
 
-    public abstract void attributionIndividu(GedcomEntity E);
+    public abstract void attribuateIndividu(GedcomEntity E);
 
     @Override
     public abstract String toString();

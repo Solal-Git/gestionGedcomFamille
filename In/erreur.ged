@@ -1,0 +1,123 @@
+0 HEAD
+
+0 @F1@ FAM
+ 1 HUSB @I1@
+ 1 WIFE @I2@
+ 1 CHIL @I3@
+ 1 CHIL @I4@
+ 1 MARR
+   2 DATE 7 AUG 1987
+   2 PLAC United States
+
+0 @F2@ FAM
+ 1 HUSB @I3@
+ 1 WIFE @I333@
+ 1 CHIL @I5@
+ 1 CHIL @I6@
+ 1 MARR
+   2 DATE 22 AUG 1990
+   2 PLAC France
+
+0 @F3@ FAM
+  1 HUSB @I3@
+  1 WIFE @I33@
+  1 CHIL @I7@
+  1 CHIL @I8@
+  1 MARR
+   2 DATE 9 AUG 1996
+   2 PLAC France
+
+0 @F4@ FAM
+  1 HUSB @I5@
+  1 WIFE @I29@
+  1 CHIL @I1@
+
+0 @F5@ FAM
+  1 HUSB @I68@
+  1 WIFE @I69@
+  1 CHIL @I333@
+  1 MARR
+   2 DATE 22 SEP 1980
+   2 PLAC France
+
+0 @F6@ FAM
+  1 HUSB @I6@
+  1 WIFE @I7@
+
+
+0 @I1@ INDI
+  1 NAME Robert
+  1 SEX M
+  1 FAMS @F1@
+  1 BIRT
+   2 DATE 20 JUN 1956
+  1 DEAT
+   2 DATE  19 MAR 1976
+
+0 @I2@ INDI
+  1 NAME Emilie
+  1 SEX F
+  1 FAMS @F1@
+  1 BIRT 1 JAN 1974
+
+0 @I3@ INDI
+  1 NAME Serge
+  1 SEX M
+  1 FAMC @F1@
+  1 FAMS @F2@
+  1 FAMS @F3@
+  1 BIRT 6 APR 1984
+
+0 @I33@ INDI
+  1 NAME Francoise
+  1 SEX F
+  1 FAMS @F3@
+
+0 @I333@ INDI
+  1 NAME Nicole
+  1 SEX F
+  1 FAMC @F5@
+  1 FAMS @F2@
+
+0 @I4@ INDI
+  1 NAME Frederic
+  1 SEX M
+  1 FAMC @F1@
+  1 BIRT
+   2 DATE 27 MAY 1982
+
+0 @I6@ INDI
+  1 NAME Nicolas
+  1 FAMC @F2@
+  1 FAMS @F6@
+  1 DEAT
+   2 DATE 5 OCT 1998
+
+0 @I7@ INDI
+  1 NAME Estelle
+  1 FAMC @F3@
+  1 FAMS @F6@
+  1 BIRT
+  2 DATE 22 JUN 1979
+
+0 @I8@ INDI
+  1 NAME Florence
+  1 FAMC @F3@
+
+0 @I5@ INDI
+  1 NAME Jerome
+  1 SEX M
+  1 FAMC @F2@
+  1 FAMS @F4@
+  1 BIRT
+  2 DATE 4 JUN 1979
+
+0 @I29@ INDI
+  1 NAME Manuelle
+  1 FAMS @F4@
+
+0 @I44@ INDI
+  1 NAME Delphine
+  1 FAMC @F6@
+
+0 TRLR
