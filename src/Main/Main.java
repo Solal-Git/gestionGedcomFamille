@@ -5,6 +5,8 @@ import Gedcom_Parsing.*; // On importe le Parser ET le Serializer
 import java.io.IOException;
 import java.util.Scanner;
 
+//EXÉCUTER LE CODE DEPUIS LE FICHIER DE BASE ET NON DANS LE SRC
+
 public class Main {
 
     public static void main(String[] args) {
@@ -15,7 +17,9 @@ public class Main {
         while (graph == null) {
             System.out.println("Qu'elle est le nom du fichier ged (sans le ged)");
             System.out.println("Le fichier doit se trouver dans le dossier In");
-            String fileName = "In/" + scanner.next() + ".ged";
+            //JE NE RAJOUTE PAS /IN CAR JE LE FAIT DANS parse ETANT DONNE QUE LE LOAD NE PASSE PAR PAR LE MAIN
+            //DONC ON AURAIT UN IN/IN/
+            String fileName = scanner.next() + ".ged";
             try {
                 System.out.println("Chargement de " + fileName + "...");
                 graph = parser.parse(fileName);

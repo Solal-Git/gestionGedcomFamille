@@ -8,6 +8,9 @@ import Gedcom_Exceptions.*;
 
 public class GedcomGraph implements Serializable {
 
+    //BUG AVEC LECTURE DE SAUVEGARDE DONC FIXATION DE L'ID DU FICHIER
+    private static final long serialVersionUID = 1L;
+
     private Map<String, Individu> mapIndividus;
     private Map<String, Famille> mapFamilles;
 
@@ -52,6 +55,10 @@ public class GedcomGraph implements Serializable {
             if (f == null) {
                 throw new RefMissingException(idFam);
             }
+
+            //DEBUG
+            System.out.println("DEBUG CHECK: Enfant [" + indiv.getID() + "]");
+            System.out.println("DEBUG CHECK: Liste Enfants Famille " + f.getID() + " : " + f.getEnfantsIds());
 
             // 2. Vérifier la réciprocité (Est-ce que la famille connait cet enfant ?)
             if (!f.getEnfantsIds().contains(indiv.getID())) {

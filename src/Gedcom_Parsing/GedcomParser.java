@@ -1,5 +1,6 @@
 package Gedcom_Parsing;
 
+import Gedcom_Exceptions.GenealogyException;
 import Gedcom_Exceptions.TwiceChildException;
 import Gedcom_elements.*;
 import GedcomTag.*;
@@ -18,7 +19,14 @@ public class GedcomParser {
         graph = new GedcomGraph();
     }
 
-    public GedcomGraph parse(String filePath) throws IOException, TwiceChildException {
+    public GedcomGraph parse(String filePath) throws IOException, TwiceChildException, GenealogyException {
+        //J'AI MIS LES 2 POUR DEBUG LE LOAD ET LE IMPORT
+        if (!filePath.equals("In/" + filePath)) {
+            filePath = "In/" + filePath;
+        }
+        if (!filePath.endsWith(".ged")) {
+            filePath += ".ged";
+        }
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -66,7 +74,32 @@ public class GedcomParser {
                         break;
                 }
             }
-            // ... (Gestion Famille inchangée) ...
+            else if (currentFamille != null) {
+                switch (line.tag) {
+                    case "HUSB":
+                        currentFamille.setMari(line.value); // Stocke l'ID du mari (ex: @I1@)
+                        break;
+
+                    case "WIFE":
+                        currentFamille.setFemme(line.value); // Stocke l'ID de la femme
+                        break;
+
+                    case "CHIL":
+                        try {
+                            // C'EST LA LIGNE CRUCIALE QUI MANQUAIT !
+                            currentFamille.addEnfant(line.value);
+                        } catch (TwiceChildException e) {
+                            // On attrape l'exception si l'enfant est cité deux fois
+                            System.err.println("Attention (Doublon ignoré) : " + e.getMessage());
+                        }
+                        break;
+
+                    case "OBJE":
+                        currentMultimedia = new TagMultimedia();
+                        currentFamille.setMultimedia(currentMultimedia);
+                        break;
+                }
+            }
         }
 
         // --- NIVEAU 2 (C'est ici qu'on gère DATE et FICHIERS) ---
