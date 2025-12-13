@@ -8,13 +8,12 @@ public class GedcomSerializer {
     /**
      * Sauvegarde le graphe entier dans un fichier binaire (.ser)
      */
-    public static void sauvegarder(GedcomGraph graph, String nomFichier) throws IOException {
-        // On ajoute l'extension .ser si l'utilisateur l'a oubliée
+    public static void save(GedcomGraph graph, String nomFichier) throws IOException {
         if (!nomFichier.endsWith(".ser")) {
             nomFichier += ".ser";
         }
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(nomFichier))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("Save/"+nomFichier))) {
             oos.writeObject(graph);
             System.out.println(">> Sauvegarde réussie dans : " + nomFichier);
         }
@@ -23,14 +22,14 @@ public class GedcomSerializer {
     /**
      * Charge un graphe depuis un fichier binaire
      */
-    public static GedcomGraph charger(String nomFichier) throws IOException, ClassNotFoundException {
+    public static GedcomGraph load(String nomFichier) throws IOException, ClassNotFoundException {
         if (!nomFichier.endsWith(".ser")) {
             nomFichier += ".ser";
         }
 
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nomFichier))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("Save/" +nomFichier))) {
             GedcomGraph graph = (GedcomGraph) ois.readObject();
-            System.out.println(">> Chargement réussi depuis : " + nomFichier);
+            System.out.println(">> Chargement réussi depuis : " + "Save/" + nomFichier);
             return graph;
         }
     }

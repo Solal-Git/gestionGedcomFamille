@@ -1,5 +1,6 @@
 package Gedcom_Parsing;
 
+import Gedcom_Exceptions.TwiceChildException;
 import Gedcom_elements.*;
 import GedcomTag.*;
 import java.io.BufferedReader;
@@ -17,7 +18,7 @@ public class GedcomParser {
         graph = new GedcomGraph();
     }
 
-    public GedcomGraph parse(String filePath) throws IOException {
+    public GedcomGraph parse(String filePath) throws IOException, TwiceChildException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -28,7 +29,6 @@ public class GedcomParser {
             }
         }
 
-        // Validation finale (IMPORTANT)
         graph.construireEtValiderGraphe();
 
         return graph;

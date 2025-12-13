@@ -178,4 +178,20 @@ public class GedcomGraph implements Serializable {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Graphe généalogique\n");
+        sb.append("Individus :\n");
+        for (Individu i : mapIndividus.values()) {
+            sb.append("  ").append(i).append("\n");
+        }
+        sb.append("\n");
+
+        sb.append("Familles :\n");
+        for (Famille f : mapFamilles.values()) {
+            sb.append(f).append("\n");
+        }
+        return sb.toString();
+    }
 }

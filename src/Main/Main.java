@@ -1,3 +1,5 @@
+package Main;
+
 import Gedcom_elements.*;
 import Gedcom_Parsing.*; // On importe le Parser ET le Serializer
 import java.io.IOException;
@@ -9,24 +11,31 @@ public class Main {
         GedcomParser parser = new GedcomParser();
         GedcomGraph graph = null;
         Scanner scanner = new Scanner(System.in);
-        String nomFichierDefaut = "test.ged";
 
-        // Chargement initial automatique (optionnel)
-        try {
-            System.out.println("Chargement initial de " + nomFichierDefaut + "...");
-            graph = parser.parse(nomFichierDefaut);
-        } catch (Exception e) {
-            System.out.println("Pas de fichier par défaut trouvé. Graph vide.");
-            graph = new GedcomGraph(); // On démarre avec un graphe vide
+        while (graph == null) {
+            System.out.println("Qu'elle est le nom du fichier ged (sans le ged)");
+            System.out.println("Le fichier doit se trouver dans le dossier In");
+            String fileName = "In/" + scanner.next() + ".ged";
+            try {
+                System.out.println("Chargement de " + fileName + "...");
+                graph = parser.parse(fileName);
+            } catch (Exception e) {
+                System.out.println("Pas de fichier trouvé.");
+                System.out.println("vérifié le nom du fichier mais aussi son emplacement.");
+            }
         }
 
         boolean running = true;
         System.out.println("\n=== SYSTEME DE GENEALOGIE ===");
+        System.out.println("\n=== OPTION DE RECHERCHE ===");
         System.out.println(" INFO <Nom>      : Détails d'une personne");
+        System.out.println(" ALL             : Info de toutes les personnes");
         System.out.println(" CHILD <Nom>     : Liste des enfants");
+        System.out.println("\n=== OPTION DE GESTION ===");
         System.out.println(" SAVE <Fichier>  : Sauvegarder le graphe (.ser)");
         System.out.println(" LOAD <Fichier>  : Charger un graphe (.ser)");
         System.out.println(" IMPORT <Fichier>: Lire un nouveau fichier GEDCOM (.ged)");
+        System.out.println("=============================");
         System.out.println(" EXIT            : Quitter");
         System.out.println("=============================");
 
@@ -46,27 +55,33 @@ public class Main {
                         break;
 
                     case "INFO":
-                        if (graph != null) afficherInfo(graph, arg);
+                        if (graph != null) {
+                            afficherInfo(graph, arg);
+                        }
                         break;
 
                     case "CHILD":
-                        if (graph != null) afficherEnfants(graph, arg);
+                        if (graph != null){
+                            afficherEnfants(graph, arg);
+                        }
                         break;
 
                     case "SAVE": // NOUVEAU
                         if (graph != null && !arg.isEmpty()) {
-                            GedcomSerializer.sauvegarder(graph, arg);
-                        } else {
+                            GedcomSerializer.save(graph, arg);
+                        }
+                        else {
                             System.out.println("Erreur : précisez un nom de fichier (ex: SAVE data)");
                         }
                         break;
 
                     case "LOAD": // NOUVEAU
                         if (!arg.isEmpty()) {
-                            graph = GedcomSerializer.charger(arg);
+                            graph = GedcomSerializer.load(arg);
                             // IMPORTANT : On reconstruit les liens objets qui étaient 'transient'
                             graph.construireEtValiderGraphe();
-                        } else {
+                        }
+                        else {
                             System.out.println("Erreur : précisez un nom de fichier.");
                         }
                         break;
@@ -78,20 +93,23 @@ public class Main {
                         }
                         break;
 
+                    case "ALL" :
+                        if (graph != null) {
+                            System.out.println(graph.toString());
+                        }
+                        break;
+
                     default:
                         System.out.println("Commande inconnue.");
                 }
             } catch (Exception e) {
                 System.out.println("Erreur durant l'opération : " + e.getMessage());
-                // e.printStackTrace(); // Décommente pour voir les détails si bug
             }
         }
         scanner.close();
         System.out.println("Fermeture du programme.");
     }
 
-    // --- Garde tes méthodes afficherInfo et afficherEnfants ici ---
-    // (Je ne les remets pas pour ne pas surcharger, garde celles de l'étape précédente)
 
     private static void afficherInfo(GedcomGraph graph, String nom) {
         Individu i = graph.rechercheParNom(nom);
