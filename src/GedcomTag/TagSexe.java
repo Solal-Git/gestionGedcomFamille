@@ -1,6 +1,8 @@
-package Gedcom_elements;
+package GedcomTag;
+import Gedcom_elements.*;
+import Gedcom_elements.Individu;
 
-public class TagSexe extends GedcomTag{
+public class TagSexe extends GedcomTag {
 
     public TagSexe(String value) {
         super(1,"SEXE",value);

@@ -1,4 +1,6 @@
-package Gedcom_elements;
+package GedcomTag;
+
+import Gedcom_elements.*;
 
 public class TagMultimedia extends GedcomTag {
 

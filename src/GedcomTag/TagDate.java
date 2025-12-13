@@ -1,4 +1,5 @@
-package Gedcom_elements;
+package GedcomTag;
+import Gedcom_elements.*;
 
 public class TagDate extends GedcomEntity {
 

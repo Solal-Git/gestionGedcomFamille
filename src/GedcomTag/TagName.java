@@ -1,6 +1,8 @@
-package Gedcom_elements;
+package GedcomTag;
+import Gedcom_elements.*;
+import Gedcom_elements.Individu;
 
-public class TagName extends GedcomTag{
+public class TagName extends GedcomTag {
 
     public TagName(String value) {
         super(1, "NAME", value);

@@ -1,4 +1,6 @@
-package Gedcom_elements;
+package GedcomTag;
+
+import Gedcom_elements.GedcomEntity;
 
 import java.io.Serializable;
 

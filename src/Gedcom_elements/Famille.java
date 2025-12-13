@@ -1,76 +1,55 @@
 package Gedcom_elements;
 
+import GedcomTag.TagMultimedia;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Famille extends GedcomEntity {
 
-    private String HUSB;   // Tag HUSB
-    private String WIFE;  // Tag WIFE
-    private List<String> CHIL; // Tags CHIL
-
+    // Parsing (Strings)
+    private String HUSB;
+    private String WIFE;
+    private List<String> CHIL;
     private TagMultimedia multimediaTag;
+
+    // Graphe (Objets réels à AJOUTER)
+    private transient Individu mariObj;
+    private transient Individu femmeObj;
+    private transient List<Individu> enfantsObj;
 
     public Famille(String id) {
         super(0, "FAM", null, id);
         this.CHIL = new ArrayList<>();
-        this.HUSB = "";
-        this.WIFE = "";
+        this.enfantsObj = new ArrayList<>(); // Ne pas oublier d'init la liste
+        this.HUSB = null; // Mieux vaut null que "" pour détecter l'absence
+        this.WIFE = null;
     }
 
-    public void setMari(String id) {
-        this.HUSB = id;
-    }
-    public void setFemme(String id) {
-        this.WIFE = id;
-    }
+    // ... Tes setters existants ...
 
-    public void ajouterEnfant(String idEnfant) {
-        this.CHIL.add(idEnfant);
-    }
+    // --- AJOUTER CES GETTERS (Indispensable) ---
+    public String getMariId() { return HUSB; }
+    public String getFemmeId() { return WIFE; }
+    public List<String> getEnfantsIds() { return CHIL; }
 
-    public void setMultimedia(TagMultimedia multimedia) {
-        this.multimediaTag = multimedia;
-    }
+    // --- AJOUTER CES MÉTHODES DE LIAISON ---
+    public void setMariObj(Individu i) { this.mariObj = i; }
+    public Individu getMariObj() { return mariObj; }
+
+    public void setFemmeObj(Individu i) { this.femmeObj = i; }
+    public Individu getFemmeObj() { return femmeObj; }
+
+    public void addEnfantObj(Individu i) { this.enfantsObj.add(i); }
+    public List<Individu> getEnfantsObj() { return enfantsObj; }
+
+    // ... Reste de ta classe ...
+    public void setMari(String id) { this.HUSB = id; }
+    public void setFemme(String id) { this.WIFE = id; }
+    public void addEnfant(String idEnfant) { this.CHIL.add(idEnfant); }
+    public void setMultimedia(TagMultimedia multimedia) { this.multimediaTag = multimedia; }
 
     @Override
     public String toString() {
-        return "Famille " + ID + " (Mari: " + HUSB + ", Femme: " + WIFE + ")";
+        return "Famille " + ID;
     }
 }
-
-/*package fr.univ.projetgedcom;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-
-public class GenealogyGraph implements Serializable {
-
-    private Map<String, Individu> mapIndividus;
-    private Map<String, Famille> mapFamilles;
-
-    public GenealogyGraph() {
-        this.mapIndividus = new HashMap<>();
-        this.mapFamilles = new HashMap<>();
-    }
-
-    public void ajouterIndividu(Individu i) {
-        mapIndividus.put(i.getId(), i);
-    }
-
-    public void ajouterFamille(Famille f) {
-        mapFamilles.put(f.getId(), f);
-    }
-
-    public Individu getIndividu(String id) {
-        return mapIndividus.get(id);
-    }
-
-    public Famille getFamille(String id) {
-        return mapFamilles.get(id);
-    }
-
-    public Map<String, Individu> getMapIndividus() { return mapIndividus; }
-    public Map<String, Famille> getMapFamilles() { return mapFamilles; }
-}*/

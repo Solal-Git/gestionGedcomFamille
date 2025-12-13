@@ -1,0 +1,21 @@
+0 @I1@ INDI
+1 NAME Jean /Dupont/
+1 SEX M
+1 FAMS @F1@
+0 @I2@ INDI
+1 NAME Marie /Durand/
+1 SEX F
+1 FAMS @F1@
+0 @I3@ INDI
+1 NAME Paul /Dupont/
+1 SEX M
+1 FAMC @F1@
+0 @I4@ INDI
+1 NAME Julie /Dupont/
+1 SEX F
+1 FAMC @F1@
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+1 CHIL @I4@

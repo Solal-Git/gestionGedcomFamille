@@ -1,24 +1,52 @@
 package Gedcom_elements;
+import GedcomTag.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Individu extends GedcomEntity {
 
-    // On stocke les OBJETS spécifiques pour un accès rapide
+    // ... Tes attributs existants (nameTag, sexTag, etc.) ...
     private TagName nameTag;
     private TagSexe sexTag;
-    private TagMultimedia multimediaTag;  // A faire pour l'attribut OBJE, A AMELIORER !!!!
+    private TagMultimedia multimediaTag;
 
-    //Lien vers les familles
+    // --- Côté Parsing (Ce que tu as déjà) ---
     private String famcId;
     private List<String> famsIds = new ArrayList<>();
+
+    // --- Côté Graphe (CE QU'IL FAUT AJOUTER) ---
+    // transient = on ne sauvegarde pas ça directement, on le reconstruit
+    private transient Famille familleParentObj;
+    private transient List<Famille> famillesPropresObj = new ArrayList<>();
 
     public Individu(String id) {
         super(0, "INDI", null, id);
     }
 
+    // ... Tes setters existants ...
+
+    // --- AJOUTER CES GETTERS (Indispensable pour le Graph) ---
+    public String getFamcId() { return famcId; }
+    public List<String> getFamsIds() { return famsIds; }
+
+    // --- AJOUTER CES MÉTHODES DE LIAISON ---
+    public void setFamilleParentObj(Famille f) { this.familleParentObj = f; }
+    public Famille getFamilleParentObj() { return familleParentObj; }
+
+    public void addFamillePropreObj(Famille f) { this.famillesPropresObj.add(f); }
+    public List<Famille> getFamillesPropresObj() { return famillesPropresObj; }
+
+    // ... Le reste de ta classe (addPropriete, toString, etc.) ...
+    public void setFamcId(String famcId) {
+        this.famcId = famcId;
+    }
+
+    public void addFamsId(String famsId) {
+        this.famsIds.add(famsId);
+    }
+
     //Appelé par le lecteur
-    public void ajouterPropriete(GedcomTag tag) {
+    public void addPropriete(GedcomTag tag) {
         tag.attributionIndividu(this);
     }
 
@@ -34,28 +62,16 @@ public class Individu extends GedcomEntity {
         this.multimediaTag = multimedia;
     }
 
-    // A CHANGER !!!!!! LES 3 POUR LES UTILISER AVEC LE TOSTRING !!!!
     public TagName getNameTag() {
         return nameTag;
-    }
-
-    public TagSexe getSexTag() {
-        return sexTag;
-    }
-
-    public TagMultimedia getMultimediaTag() {
-        return multimediaTag;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Individu [").append(ID).append("]: ");
-        sb.append(getNameTag());
-        if (sexTag != null) sb.append(", ").append(sexTag.toString());
-        if (multimediaTag != null) {
-            sb.append("\n  Média : ").append(multimediaTag.toString());
-        }
+        if(nameTag != null) sb.append(nameTag);
+        else sb.append("Inconnu");
         return sb.toString();
     }
 }
