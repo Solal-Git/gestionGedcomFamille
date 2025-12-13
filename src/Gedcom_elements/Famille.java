@@ -5,29 +5,37 @@ import java.util.List;
 
 public class Famille extends GedcomEntity {
 
-    private String idMari;   // Tag HUSB
-    private String idFemme;  // Tag WIFE
-    private List<String> idsEnfants; // Tags CHIL
+    private String HUSB;   // Tag HUSB
+    private String WIFE;  // Tag WIFE
+    private List<String> CHIL; // Tags CHIL
+
+    private TagMultimedia multimediaTag;
 
     public Famille(String id) {
         super(0, "FAM", null, id);
-        this.idsEnfants = new ArrayList<>();
+        this.CHIL = new ArrayList<>();
+        this.HUSB = "";
+        this.WIFE = "";
     }
 
     public void setMari(String id) {
-        this.idMari = id;
+        this.HUSB = id;
     }
     public void setFemme(String id) {
-        this.idFemme = id;
+        this.WIFE = id;
     }
 
     public void ajouterEnfant(String idEnfant) {
-        this.idsEnfants.add(idEnfant);
+        this.CHIL.add(idEnfant);
+    }
+
+    public void setMultimedia(TagMultimedia multimedia) {
+        this.multimediaTag = multimedia;
     }
 
     @Override
     public String toString() {
-        return "Famille " + ID + " (Mari: " + idMari + ", Femme: " + idFemme + ")";
+        return "Famille " + ID + " (Mari: " + HUSB + ", Femme: " + WIFE + ")";
     }
 }
 

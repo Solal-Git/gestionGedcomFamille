@@ -1,23 +1,21 @@
 package Gedcom_elements;
 
-public class TagName extends GedcomEntity {
+public class TagName extends GedcomTag{
 
     public TagName(String value) {
-        super(1,"NAME",value,null);
-    }
-
-    public String getNomPropre(){
-        String tempValue = value;
-        if (tempValue != null){
-            tempValue.replace("/", "");
-            return tempValue;
-        }
-        return tempValue;
+        super(1, "NAME", value);
     }
 
     @Override
-    public String toString(){
-        return getNomPropre();
+    public void attributionIndividu(GedcomEntity E) {
+        if (E instanceof Individu I) {
+            I.setName(this);
+        }
     }
 
+    @Override
+    public String toString() {
+        return value.replace("/", "");
+    }
 }
+
