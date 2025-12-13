@@ -33,8 +33,18 @@ public class Individu extends GedcomEntity {
     public void setFamilleParentObj(Famille f) { this.familleParentObj = f; }
     public Famille getFamilleParentObj() { return familleParentObj; }
 
-    public void addFamillePropreObj(Famille f) { this.famillesPropresObj.add(f); }
-    public List<Famille> getFamillesPropresObj() { return famillesPropresObj; }
+    public void addFamillePropreObj(Famille f) {
+        if (this.famillesPropresObj == null) {
+            this.famillesPropresObj = new ArrayList<>();
+        }
+        this.famillesPropresObj.add(f);
+    }
+    public List<Famille> getFamillesPropresObj() {
+        if (this.famillesPropresObj == null) {
+            this.famillesPropresObj = new ArrayList<>();
+        }
+        return this.famillesPropresObj;
+    }
 
     // ... Le reste de ta classe (addPropriete, toString, etc.) ...
     public void setFamcId(String famcId) {

@@ -39,8 +39,18 @@ public class Famille extends GedcomEntity {
     public void setFemmeObj(Individu i) { this.femmeObj = i; }
     public Individu getFemmeObj() { return femmeObj; }
 
-    public void addEnfantObj(Individu i) { this.enfantsObj.add(i); }
-    public List<Individu> getEnfantsObj() { return enfantsObj; }
+    public void addEnfantObj(Individu i) {
+        if (this.enfantsObj == null) {
+            this.enfantsObj = new ArrayList<>();
+    }
+        this.enfantsObj.add(i);}
+
+    public List<Individu> getEnfantsObj() {
+        if (this.enfantsObj == null) {
+            this.enfantsObj = new ArrayList<>();
+    }
+        return this.enfantsObj;
+    }
 
     // ... Reste de ta classe ...
     public void setMari(String id) { this.HUSB = id; }

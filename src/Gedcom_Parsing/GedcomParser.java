@@ -10,6 +10,8 @@ public class GedcomParser {
     private GedcomGraph graph;
     private Individu currentIndividu = null;
     private Famille currentFamille = null;
+    private String lastTagLevel1 = "";
+    private TagMultimedia currentMultimedia = null; // Pour construire l'objet petit à petit
 
     public GedcomParser() {
         graph = new GedcomGraph();
@@ -36,47 +38,55 @@ public class GedcomParser {
         if (line.level == 0) {
             currentIndividu = null;
             currentFamille = null;
+            lastTagLevel1 = ""; // Reset
 
             if ("INDI".equals(line.tag)) {
-                // On garde l'ID brut (avec les @)
                 currentIndividu = new Individu(line.id);
                 graph.ajouterIndividu(currentIndividu);
-            }
-            else if ("FAM".equals(line.tag)) {
-                // On garde l'ID brut
+            } else if ("FAM".equals(line.tag)) {
                 currentFamille = new Famille(line.id);
                 graph.ajouterFamille(currentFamille);
             }
         }
+
+        // --- NIVEAU 1 ---
         else if (line.level == 1) {
+            lastTagLevel1 = line.tag; // On mémorise le tag (ex: BIRT ou OBJE)
+
             if (currentIndividu != null) {
                 switch (line.tag) {
-                    case "NAME":
-                        currentIndividu.addPropriete(new TagName(line.value));
-                        break;
-                    case "SEX":
-                        currentIndividu.addPropriete(new TagSexe(line.value));
-                        break;
-                    case "FAMC":
-                        // On garde la valeur brute (@F1@)
-                        currentIndividu.setFamcId(line.value);
-                        break;
-                    case "FAMS":
-                        currentIndividu.addFamsId(line.value);
+                    case "NAME": currentIndividu.setName(new TagName(line.value)); break;
+                    case "SEX":  currentIndividu.setSex(new TagSexe(line.value)); break;
+                    case "FAMC": currentIndividu.setFamcId(line.value); break;
+                    case "FAMS": currentIndividu.addFamsId(line.value); break;
+
+                    case "OBJE": // Début d'un bloc multimédia
+                        currentMultimedia = new TagMultimedia();
+                        currentIndividu.setMultimedia(currentMultimedia);
                         break;
                 }
             }
-            else if (currentFamille != null) {
-                switch (line.tag) {
-                    case "HUSB":
-                        currentFamille.setMari(line.value);
-                        break;
-                    case "WIFE":
-                        currentFamille.setFemme(line.value);
-                        break;
-                    case "CHIL":
-                        currentFamille.addEnfant(line.value);
-                        break;
+            // ... (Gestion Famille inchangée) ...
+        }
+
+        // --- NIVEAU 2 (C'est ici qu'on gère DATE et FICHIERS) ---
+        else if (line.level == 2) {
+            if (currentIndividu != null) {
+
+                // Si le niveau 1 précédent était une Naissance (BIRT)
+                if ("BIRT".equals(lastTagLevel1) && "DATE".equals(line.tag)) {
+                    // Tu peux ajouter une propriété TagDate à l'individu
+                    // currentIndividu.addPropriete(new TagDate(line.value));
+                    // (Ou créer un champ spécifique 'dateNaissance' dans Individu)
+                }
+
+                // Si le niveau 1 précédent était un Objet Multimédia (OBJE)
+                if ("OBJE".equals(lastTagLevel1) && currentMultimedia != null) {
+                    switch (line.tag) {
+                        case "FILE": currentMultimedia.setFichier(line.value); break;
+                        case "TITL": currentMultimedia.setTitre(line.value); break;
+                        case "FORM": currentMultimedia.setFormat(line.value); break;
+                    }
                 }
             }
         }

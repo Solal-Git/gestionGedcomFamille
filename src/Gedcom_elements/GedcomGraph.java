@@ -113,4 +113,25 @@ public class GedcomGraph implements Serializable {
             }
         }
     }
+    /**
+     * Recherche un individu par son nom ou une partie de son nom.
+     * Retourne le premier trouvé (ou null).
+     */
+    public Individu rechercheParNom(String recherche) {
+        // On normalise en minuscule pour éviter les problèmes de majuscules
+        String rechercheLower = recherche.toLowerCase();
+
+        for (Individu i : mapIndividus.values()) {
+            if (i.getNameTag() != null) {
+                // On récupère le nom propre (sans les / /) via toString du TagName
+                String nomComplet = i.getNameTag().toString().toLowerCase();
+
+                // Si le nom contient la recherche (ex: "Jean Dupont" contient "Jean")
+                if (nomComplet.contains(rechercheLower)) {
+                    return i;
+                }
+            }
+        }
+        return null;
+    }
 }
