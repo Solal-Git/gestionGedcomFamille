@@ -1,0 +1,97 @@
+0 HEAD
+1 SOUR GedcomEditor
+1 GEDC
+2 VERS 5.5
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+
+0 @F_EXIST_1@ FAM
+1 HUSB @I_PERE_NORMAL@
+
+0 @F_EXIST_2@ FAM
+1 HUSB @I_AUTRE_PERE@
+
+0 @F_LINK_ERR@ FAM
+1 HUSB @I_PERE_NORMAL@
+NOTE Cette famille ne liste PAS l'enfant @I_LINK_PB@ alors qu'il le prétend
+
+0 @F_GENRE_1@ FAM
+1 HUSB @I_FEMME_HUSB@
+1 WIFE @I_PERE_NORMAL@
+
+0 @F_GENRE_2@ FAM
+1 HUSB @I_PERE_NORMAL@
+1 WIFE @I_HOMME_WIFE@
+
+0 @F_CYCLE_A@ FAM
+1 HUSB @I_CYCLE_PERE@
+1 CHIL @I_CYCLE_FILS@
+
+0 @F_CYCLE_B@ FAM
+1 HUSB @I_CYCLE_FILS@
+1 CHIL @I_CYCLE_PERE@
+
+0 @I_PERE_NORMAL@ INDI
+1 NAME Jean /Normal/
+1 SEX M
+
+0 @I_AUTRE_PERE@ INDI
+1 NAME Marc /Autre/
+1 SEX M
+
+
+0 @I_DOUBLE_FAMC@ INDI
+1 NAME Double /Foyer/
+1 NOTE TEST 1: IsAlreadyChildException
+1 FAMC @F_EXIST_1@
+1 FAMC @F_EXIST_2@
+
+
+0 @I_MISSING_FAMC@ INDI
+1 NAME Orphelin /Fantome/
+1 NOTE TEST 2: RefMissingException (FAMC)
+1 FAMC @F_INEXISTANTE@
+
+
+0 @I_MISSING_FAMS@ INDI
+1 NAME Veuf /Imaginaire/
+1 NOTE TEST 3: RefMissingException (FAMS)
+1 FAMS @F_INEXISTANTE_2@
+
+
+0 @I_LINK_PB@ INDI
+1 NAME Enfant /Oublie/
+1 NOTE TEST 4: LinkIncoherentException
+1 FAMC @F_LINK_ERR@
+
+
+0 @I_FEMME_HUSB@ INDI
+1 NAME Drag /King/
+1 NOTE TEST 5: GenderMismatchException (Femme en mari)
+1 SEX F
+1 FAMS @F_GENRE_1@
+
+
+0 @I_HOMME_WIFE@ INDI
+1 NAME Drag /Queen/
+1 NOTE TEST 6: GenderMismatchException (Homme en femme)
+1 SEX M
+1 FAMS @F_GENRE_2@
+
+
+0 @I_CYCLE_PERE@ INDI
+1 NAME Chronos /LePere/
+1 NOTE TEST 7: GenealogyException (Cycle)
+1 SEX M
+1 FAMS @F_CYCLE_A@
+1 FAMC @F_CYCLE_B@
+
+
+0 @I_CYCLE_FILS@ INDI
+1 NAME Zeus /LeFils/
+1 NOTE TEST 7: GenealogyException (Cycle)
+1 SEX M
+1 FAMC @F_CYCLE_A@
+1 FAMS @F_CYCLE_B@
+
+0 TRLR
