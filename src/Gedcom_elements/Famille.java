@@ -84,10 +84,8 @@ public class Famille extends GedcomEntity {
         this.WIFE = id;
     }
 
-    public void addEnfant(String idEnfant) throws TwiceChildException {
-        if (this.CHIL.contains(idEnfant)) {
-            throw new TwiceChildException("L'enfant " + idEnfant + " est déjà présent dans la famille " + this.ID);
-        }
+    //EXCEPTION ENLEVÉ CAR GÉRÉE AILLEURS, SINON CONFLIT
+    public void addEnfant(String idEnfant) {
         this.CHIL.add(idEnfant);
     }
 

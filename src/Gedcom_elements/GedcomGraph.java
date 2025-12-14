@@ -42,6 +42,7 @@ public class GedcomGraph implements Serializable {
 
         // Copie de la liste pour éviter les erreurs si on ajoute des familles pendant la boucle
         List<Individu> tousLesIndividus = new ArrayList<>(mapIndividus.values());
+        List<Famille> toutesLesFamilles = new ArrayList<>(mapFamilles.values());
 
         for (Individu indiv : tousLesIndividus) {
 
@@ -65,7 +66,7 @@ public class GedcomGraph implements Serializable {
                 // On force les liens
                 try {
                     newF.addEnfant(indiv.getID());
-                } catch (Exception ex) { /* Ignorer doublon */ }
+                } catch (Exception ex) {}
 
                 newF.addEnfantObj(indiv);
                 indiv.setFamilleParentObj(newF);
@@ -93,13 +94,42 @@ public class GedcomGraph implements Serializable {
             // --- BLOC 2 : VÉRIFICATION SÉMANTIQUE (Genre, Conjoint) ---
             try {
                 checkSpouseLink(indiv);
-            } catch (GenderMissMatchException e) {
+            }
+            catch (GenderMissMatchException e) {
                 // On signale l'erreur de genre
                 rapport.add("[ALERTE GENRE] " + e.getMessage());
-            } catch (RefMissingException e) {
-                rapport.add("[ALERTE] Famille FAMS manquante : " + e.getId());
-            } catch (Exception e) {
+            }
+            catch (RefMissingException e) {
+                // --- CORRECTION ICI : ON FAIT PAREIL QUE POUR FAMC ---
+                rapport.add("[RÉPARATION] " + e.getMessage() + " -> Famille créée.");
+
+                // 1. On crée la famille manquante
+                Famille newF = new Famille(e.getId());
+                addFamilly(newF);
+
+                // 2. On lie l'individu à cette famille
+                indiv.addFamillePropreObj(newF);
+
+                // 3. On essaie de deviner si c'est le mari ou la femme
+                String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "?";
+                if ("M".equals(sexe)) {
+                    newF.setMari(indiv.getID());
+                    newF.setMariObj(indiv);
+                } else if ("F".equals(sexe)) {
+                    newF.setFemme(indiv.getID());
+                    newF.setFemmeObj(indiv);
+                }
+            }
+            catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        for (Famille f : toutesLesFamilles) {
+            try {
+                checkTwiceChild(f);
+            } catch (TwiceChildException e) {
+                rapport.add("[ALERTE DOUBLON] " + e.getMessage());
             }
         }
 
@@ -113,6 +143,18 @@ public class GedcomGraph implements Serializable {
         }
 
         return rapport;
+    }
+
+    private void checkTwiceChild(Famille f) throws TwiceChildException {
+        List<String> enfants = f.getEnfantsIds();
+        List<String> enfantsVus = new ArrayList<>();
+
+        for (String idEnfant : enfants) {
+            if (enfantsVus.contains(idEnfant)) {
+                throw new TwiceChildException("L'enfant " + idEnfant + " est cité en double dans la famille " + f.getID());
+            }
+            enfantsVus.add(idEnfant);
+        }
     }
 
     private void checkChildLink(Individu indiv) throws RefMissingException, LinkIncoherentException, IsAlreadyChildException {
@@ -222,7 +264,7 @@ public class GedcomGraph implements Serializable {
                 }
             }
             catch (GenealogyException e) {
-                throw new GenealogyException(e.getMessage(), e.getCycle());         //récup l'erreur si il y a un cycle
+                throw e;         //récup l'erreur si il y a un cycle
             }
         }
     }

@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class TwiceChildException extends GedcomNatException {
 
     public TwiceChildException(String message) {
-        super("Erreur deux fois un enfant : " + message) ;
+        super("TwiceChildErr : " + message) ;
     }
 
 }

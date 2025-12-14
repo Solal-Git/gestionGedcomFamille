@@ -7,7 +7,7 @@ public class LinkIncoherentException extends LogicException {
     private Famille f;
 
     public LinkIncoherentException(String message, Individu i, Famille f) {
-        super("LinkIncoherent : " + message);
+        super("LinkIncoherentErr : " + message);
         this.i = i;
         this.f = f;
     }

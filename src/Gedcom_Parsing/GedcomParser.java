@@ -65,10 +65,21 @@ public class GedcomParser {
 
             if (currentIndividu != null) {
                 switch (line.tag) {
-                    case "NAME": currentIndividu.setName(new TagName(line.value)); break;
-                    case "SEX":  currentIndividu.setSex(new TagSexe(line.value)); break;
-                    case "FAMC": currentIndividu.setFamcId(line.value); break;
-                    case "FAMS": currentIndividu.addFamsId(line.value); break;
+                    case "NAME":
+                        currentIndividu.setName(new TagName(line.value)); break;
+                    case "SEX":
+                        currentIndividu.setSex(new TagSexe(line.value)); break;
+                    case "FAMC":
+                        //EXCEPTION ISALREADYCHILD GéRéE ICI
+                        if (currentIndividu.getFamcId() != null) {
+                            System.out.println("[ALERTE PARSER] IsAlreadyChildErr : L'individu "
+                                    + currentIndividu.getID() + " a plusieurs parents (FAMC). "
+                                    + currentIndividu.getFamcId() + " est écrasé par " + line.value);
+                        }
+                        currentIndividu.setFamcId(line.value);
+                        break;
+                    case "FAMS":
+                        currentIndividu.addFamsId(line.value); break;
                     case "OBJE": // Début d'un bloc multimédia
                         currentMultimedia = new TagMultimedia();
                         currentIndividu.setMultimedia(currentMultimedia);
@@ -86,12 +97,7 @@ public class GedcomParser {
                         break;
 
                     case "CHIL":
-                        try {
-                            currentFamille.addEnfant(line.value);
-                        } catch (Exception e) {
-                            // On attrape l'exception si l'enfant est cité deux fois
-                            System.err.println("Attention (Doublon ignoré) : " + e.getMessage());
-                        }
+                        currentFamille.addEnfant(line.value);
                         break;
                     case "MARR":
                         break;
