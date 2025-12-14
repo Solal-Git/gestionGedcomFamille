@@ -1,12 +1,12 @@
-package GedcomTag;
+package Gedcom_Tag;
 
 import Gedcom_elements.*;
 
 public class TagMultimedia extends GedcomTag {
 
     private String format; // Tag FORM
-    private String titre;  // Tag TITL
-    private String fichier;
+    private String title;  // Tag TITL
+    private String file;
 
     public TagMultimedia() {
         super(1, "OBJE", null);
@@ -16,10 +16,10 @@ public class TagMultimedia extends GedcomTag {
         this.format = format;
     }
     public void setTitre(String titre) {
-        this.titre = titre;
+        this.title = titre;
     }
     public void setFichier(String fichier) {
-        this.fichier = fichier;
+        this.file = fichier;
     }
 
     @Override
@@ -33,6 +33,6 @@ public class TagMultimedia extends GedcomTag {
 
     @Override
     public String toString() {
-        return "Média: " + (titre != null ? titre : "Sans titre") + " [" + (fichier != null ? fichier : "?") + "]";
+        return "Média: " + (title != null ? title : "Sans titre") + " [" + (file != null ? file : "?") + "]";
         }
 }

@@ -7,7 +7,7 @@ public abstract class GedcomEntity implements Serializable {
     protected String tag;       //famille ou individu ou autre tag
     protected int level;        //Niveau dans le fichier gedcom
     protected String value;    //Information du noeud
-
+    private static final long serialVersionUID = 1L;
 
     public GedcomEntity(int level,String tag, String value,String ID ) {
         this.ID = ID;

@@ -1,15 +1,14 @@
-package GedcomTag;
+package Gedcom_Tag;
 import Gedcom_elements.*;
-import Gedcom_elements.Individu;
 
 public class TagName extends GedcomTag {
 
-    public TagName(String value) {
+    public TagName(String value) {                  // Tag NAME
         super(1, "NAME", value);
     }
 
     @Override
-    public void attribuateIndividu(GedcomEntity E) {
+    public void attribuateIndividu(GedcomEntity E) {        //attribuer le nom d'un Individu
         if (E instanceof Individu I) {
             I.setName(this);
         }
@@ -18,6 +17,6 @@ public class TagName extends GedcomTag {
     @Override
     public String toString() {
         return value.replace("/", "");
-    }
+    }   //avoir le name en string
 }
 

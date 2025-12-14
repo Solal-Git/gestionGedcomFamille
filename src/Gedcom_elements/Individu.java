@@ -1,5 +1,5 @@
 package Gedcom_elements;
-import GedcomTag.*;
+import Gedcom_Tag.*;
 import java.util.ArrayList;
 import java.util.List;
 

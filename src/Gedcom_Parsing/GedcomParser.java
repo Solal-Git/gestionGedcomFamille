@@ -3,7 +3,7 @@ package Gedcom_Parsing;
 import Gedcom_Exceptions.GenealogyException;
 import Gedcom_Exceptions.TwiceChildException;
 import Gedcom_elements.*;
-import GedcomTag.*;
+import Gedcom_Tag.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

@@ -13,7 +13,6 @@ public class GedcomGraph implements Serializable {
 
     private Map<String, Individu> mapIndividus;
     private Map<String, Famille> mapFamilles;
-
     public GedcomGraph() {
         this.mapIndividus = new HashMap<>();
         this.mapFamilles = new HashMap<>();

@@ -1,6 +1,6 @@
 package Gedcom_elements;
 
-import GedcomTag.TagMultimedia;
+import Gedcom_Tag.TagMultimedia;
 import java.util.ArrayList;
 import java.util.List;
 import Gedcom_Exceptions.*;
@@ -21,7 +21,7 @@ public class Famille extends GedcomEntity {
     public Famille(String id) {
         super(0, "FAM", null, id);
         this.CHIL = new ArrayList<>();
-        this.enfantsObj = new ArrayList<>(); // Ne pas oublier d'init la liste
+        this.enfantsObj = new ArrayList<>();
         this.HUSB = null; // Mieux vaut null que "" pour détecter l'absence
         this.WIFE = null;
     }
@@ -94,6 +94,6 @@ public class Famille extends GedcomEntity {
 
     @Override
     public String toString() {
-        return "Famille " + ID;
+        return "Famille " + ID +"\n" +" "+ HUSB +" "+ WIFE +" "+ CHIL;
     }
 }

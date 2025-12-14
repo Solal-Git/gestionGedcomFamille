@@ -1,8 +1,9 @@
 package Main;
 
 import Gedcom_elements.*;
-import Gedcom_Parsing.*; // On importe le Parser ET le Serializer
-import java.io.IOException;
+import Gedcom_Parsing.*;
+
+import java.util.List;
 import java.util.Scanner;
 
 //EXÉCUTER LE CODE DEPUIS LE FICHIER DE BASE ET NON DANS LE SRC
@@ -15,13 +16,15 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (graph == null) {
-            System.out.println("Qu'elle est le nom du fichier ged (sans le ged)");
+            System.out.println("\nQu'elle est le nom du fichier ged (sans le ged)");
             System.out.println("Le fichier doit se trouver dans le dossier In");
-            //JE NE RAJOUTE PAS /IN CAR JE LE FAIT DANS parse ETANT DONNE QUE LE LOAD NE PASSE PAR PAR LE MAIN
-            //DONC ON AURAIT UN IN/IN/
+            System.out.println("\n!!! Si vous voulez utilisez une sauvegarde déjà existante écrivez skip !!!");
             String fileName = scanner.next() + ".ged";
             try {
-                System.out.println("Chargement de " + fileName + "...");
+                if (fileName.equals("skip.ged")) {          //condition pour ne pas forcer prendre un nouveau fichier
+                    break;
+                }
+                System.out.println("Chargement de " + fileName + "...");            // tant que le fichier est pas trouvé on continue
                 graph = parser.parse(fileName);
             } catch (Exception e) {
                 System.out.println("Pas de fichier trouvé.");
@@ -30,47 +33,62 @@ public class Main {
         }
 
         boolean running = true;
-        System.out.println("\n=== SYSTEME DE GENEALOGIE ===");
-        System.out.println("\n=== OPTION DE RECHERCHE ===");
-        System.out.println(" INFO <Nom>      : Détails d'une personne");
-        System.out.println(" ALL             : Info de toutes les personnes");
-        System.out.println(" CHILD <Nom>     : Liste des enfants");
-        System.out.println("\n=== OPTION DE GESTION ===");
-        System.out.println(" SAVE <Fichier>  : Sauvegarder le graphe (.ser)");
-        System.out.println(" LOAD <Fichier>  : Charger un graphe (.ser)");
-        System.out.println(" IMPORT <Fichier>: Lire un nouveau fichier GEDCOM (.ged)");
-        System.out.println("=============================");
-        System.out.println(" EXIT            : Quitter");
-        System.out.println("=============================");
+        showCommand();
 
         while (running) {
             System.out.print("\nCommande > ");
             String input = scanner.nextLine().trim();
             if (input.isEmpty()) continue;
-
             String[] parts = input.split(" ", 2);
-            String commande = parts[0].toUpperCase();
+            String command = parts[0].toUpperCase();
             String arg = (parts.length > 1) ? parts[1] : "";
 
             try {
-                switch (commande) {
-                    case "EXIT":
+                switch (command) {
+                    case "HELP" :                   //affiche les commandes
+                        showCommand();
+                        break;
+
+                    case "EXIT":                    //quitte tout
                         running = false;
                         break;
 
+                    case "FAMC" :
+                        if (graph != null) {
+                            showChildFamilyInfo(graph, arg);
+                        }
+                        else {
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
+                        }
+                        break;
+
+                    case "MARRIED" :
+                        if (graph != null) {
+                            showSpouse(graph, arg);
+                        }
+                        else {
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
+                        }
+                        break;
                     case "INFO":
                         if (graph != null) {
-                            afficherInfo(graph, arg);
+                            showInfo(graph, arg);
+                        }
+                        else {
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
                         }
                         break;
 
                     case "CHILD":
                         if (graph != null){
-                            afficherEnfants(graph, arg);
+                            showChild(graph, arg);
+                        }
+                        else {
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
                         }
                         break;
 
-                    case "SAVE": // NOUVEAU
+                    case "SAVE":                               //Save 1 try
                         if (graph != null && !arg.isEmpty()) {
                             GedcomSerializer.save(graph, arg);
                         }
@@ -79,10 +97,9 @@ public class Main {
                         }
                         break;
 
-                    case "LOAD": // NOUVEAU
+                    case "LOAD":                              //Load 1 try
                         if (!arg.isEmpty()) {
                             graph = GedcomSerializer.load(arg);
-                            // IMPORTANT : On reconstruit les liens objets qui étaient 'transient'
                             graph.construireEtValiderGraphe();
                         }
                         else {
@@ -90,7 +107,7 @@ public class Main {
                         }
                         break;
 
-                    case "IMPORT": // Pour changer de fichier GEDCOM
+                    case "IMPORT":                                 // Pour changer de fichier GEDCOM
                         if (!arg.isEmpty()) {
                             graph = parser.parse(arg);
                             System.out.println("Nouveau fichier importé.");
@@ -99,7 +116,10 @@ public class Main {
 
                     case "ALL" :
                         if (graph != null) {
-                            System.out.println(graph.toString());
+                            System.out.println(graph);
+                        }
+                        else {
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
                         }
                         break;
 
@@ -107,7 +127,7 @@ public class Main {
                         System.out.println("Commande inconnue.");
                 }
             } catch (Exception e) {
-                System.out.println("Erreur durant l'opération : " + e.getMessage());
+                System.out.println("Erreur durant l'opération : " + e.getMessage());                    //commande non reconnue
             }
         }
         scanner.close();
@@ -115,13 +135,13 @@ public class Main {
     }
 
 
-    private static void afficherInfo(GedcomGraph graph, String nom) {
+    private static void showInfo(GedcomGraph graph, String nom) {                       //Méthode pour la commande INFO
         Individu i = graph.rechercheParNom(nom);
         if (i != null) System.out.println("Résultat : " + i.toString());
         else System.out.println("Introuvable.");
     }
 
-    private static void afficherEnfants(GedcomGraph graph, String nom) {
+    private static void showChild(GedcomGraph graph, String nom) {                      //méthode pour la commande CHILD
         Individu parent = graph.rechercheParNom(nom);
         if (parent == null) { System.out.println("Introuvable."); return; }
 
@@ -134,5 +154,47 @@ public class Main {
             }
         }
         if(!found) System.out.println("Aucun enfant.");
+    }
+    private static void showSpouse(GedcomGraph graph, String nom) {                 //méthode pour la commande MARRIED
+        Individu i = graph.rechercheParNom(nom);                                    // !!! Ajout possible d'une exception facile Andreas CHAUFFE toi pour la faire
+        if (i.getSexTag().toString().equals("M")) {
+            List<String> fam = i.getFamsIds();
+            for (String j : fam) {
+                Famille famS =(graph.getFamille(j));
+                String stringWife = famS.getFemmeId();
+                System.out.println(graph.getIndividu(stringWife).toString());
+            }
+        }
+        if (i.getSexTag().toString().equals("F")) {
+            List<String> fam = i.getFamsIds();
+            for (String j : fam) {
+                Famille famS =(graph.getFamille(j));
+                String stringHusband = famS.getMariId();
+                System.out.println(graph.getIndividu(stringHusband).toString());
+            }
+        }
+    }
+    private static void showChildFamilyInfo(GedcomGraph graph, String nom) {               //méthode pour la commande FAMC
+        Individu i = graph.rechercheParNom(nom);
+        Famille famC = graph.getFamille(i.getFamcId());
+        System.out.println(famC.toString());
+    }
+
+    private static void showCommand(){                                                      //méthode pour affichager les commandes
+        System.out.println("\n===== SYSTEME DE GENEALOGIE =====");
+        System.out.println("\n===== OPTION DE RECHERCHE =====");
+        System.out.println(" INFO <Nom>      : Détails d'une personne");
+        System.out.println(" ALL             : Info de toutes les personnes");
+        System.out.println(" CHILD <Nom>     : Liste des enfants");
+        System.out.println(" MARRIED <Nom>     : Donne le(a) conjoint(e)");
+        System.out.println(" FAMC <Nom>     : Informations sur sa famille");
+        System.out.println("\n===== OPTION DE GESTION =====");
+        System.out.println(" SAVE <Fichier>  : Sauvegarder le graphe (.ser)");
+        System.out.println(" LOAD <Fichier>  : Charger un graphe (.ser)");
+        System.out.println(" IMPORT <Fichier>: Lire un nouveau fichier GEDCOM (.ged)");
+        System.out.println("\n=============================");
+        System.out.println(" HELP            : Affiche les commandes");
+        System.out.println(" EXIT            : Quitter");
+        System.out.println("=============================");
     }
 }

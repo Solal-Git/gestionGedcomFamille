@@ -1,27 +1,26 @@
-package GedcomTag;
+package Gedcom_Tag;
 import Gedcom_elements.*;
-import Gedcom_elements.Individu;
 
 public class TagSexe extends GedcomTag {
 
-    public TagSexe(String value) {
+    public TagSexe(String value) {                          // Tag SEXE
         super(1,"SEXE",value);
     }
 
     @Override
-    public void attribuateIndividu(GedcomEntity E) {
+    public void attribuateIndividu(GedcomEntity E) {        //attribuer le sexe d'un Individu
         if (E instanceof Individu I) {
             I.setSex(this);
         }
     }
 
     @Override
-    public String toString() {
+    public String toString() {          // redéfinition de toString pour avoir le sexe en string
         if ("M".equals(value)) {
-            return "C'est un homme";
+            return "M";
         }
         else if ("F".equals(value)) {
-            return "C'est une femme";
+            return "F";
         }
         return "Le sexe est inconnu";
     }
