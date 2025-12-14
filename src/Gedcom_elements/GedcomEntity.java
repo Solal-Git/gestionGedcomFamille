@@ -2,6 +2,9 @@ package Gedcom_elements;
 
 import java.io.Serializable;
 
+/**
+ * Classe abstraite pour chaque entité
+ */
 public abstract class GedcomEntity implements Serializable {
     protected String ID;        //id de l'entité
     protected String tag;       //famille ou individu ou autre tag
@@ -34,5 +37,10 @@ public abstract class GedcomEntity implements Serializable {
     }
 
 //toString Abstraite
+
+    /**
+     * Méthodes abstraite pour afficher les informations sois d'une famille, sois d'un individu ou alors tout le graphe.
+     * @return
+     */
     public abstract String toString();
 }

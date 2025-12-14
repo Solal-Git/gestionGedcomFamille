@@ -3,6 +3,9 @@ import Gedcom_Tag.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class pour gérer les Individu
+ */
 public class Individu extends GedcomEntity {
 
     private TagName nameTag;
@@ -108,6 +111,10 @@ public class Individu extends GedcomEntity {
         return sexTag;
     }
 
+    /**
+     * Réecriture de la méthode ToSring pour afficher les informations d'un individus
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

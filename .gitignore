@@ -29,12 +29,12 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-# Fichiers compilés
+### Fichiers compilés ###
 /out/
 /target/
 *.class
 
-# Fichiers de configuration IntelliJ
+### Fichiers de configuration IntelliJ ###
 .idea/
 *.iml
 *.iws

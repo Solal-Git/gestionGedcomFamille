@@ -8,9 +8,22 @@ import java.util.List;
 import java.util.Scanner;
 
 //EXÉCUTER LE CODE DEPUIS LE FICHIER DE BASE ET NON DANS LE SRC
-
+/**
+ * Classe principale de l'application
+ * <p>
+ * Classe qui gére l'interaction entre l'utilisateurs et le graphe
+ * Elle permet de gérer la sauvegarde, le chargement et d'interroger le graphe.
+ * </p>
+ */
 public class Main {
-
+    /**
+     * Point d'entrée de la classe
+     * <p>
+     *     Initialise le parser pour la lecture et l'écriture, le graph et la lecture des entrées
+     *     Point d'entrée de l'application
+     * </p>
+     * @param args
+     */
     public static void main(String[] args) {
         GedcomParser parser = new GedcomParser();
         GedcomGraph graph = null;
@@ -57,7 +70,7 @@ public class Main {
             if (input.isEmpty()) continue;
             String[] parts = input.split(" ", 2);
             String command = parts[0].toUpperCase();
-            String arg = (parts.length > 1) ? parts[1] : ""; //CA JLE VOIS EN BIZARRE
+            String arg = (parts.length > 1) ? parts[1] : "";
 
             try {
                 switch (command) {
@@ -164,7 +177,13 @@ public class Main {
         scanner.close();
         System.out.println("Fermeture du programme.");
     }
-
+    /**
+     * Affiche le rapport d'analyse des erreurs
+     * <p>
+     *     Méthode appelée après le chargement ou la construction du grph afin de vérifier si il y a des erreurs ou non.
+     * </p>
+     * @param rapport
+     */
     //Va afficher les erreurs
     private static void afficherRapport(List<String> rapport) {
         if (rapport == null || rapport.isEmpty()) {
@@ -178,14 +197,26 @@ public class Main {
             System.out.println("--------------------------------------------------\n");
         }
     }
-
+    /**
+     * Commande Info : Affiche les info d'un individu
+     *
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     //Pour la commande INFO
     private static void showInfo(GedcomGraph graph, String nom) throws NameNotFoundException {                       //Méthode pour la commande INFO
         Individu i = graph.searchByName(nom);
         if (i != null) System.out.println("Résultat : " + i.toString());
         else System.out.println("Introuvable.");
     }
-
+    /**
+     * Commande SIBLIGNS : affiche les frere et soeur d'un individu
+     *
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     //Pour la commande SIBLINGS
     private static void showChild(GedcomGraph graph, String nom) throws NameNotFoundException {                      //méthode pour la commande CHILD
         Individu parent = graph.searchByName(nom);
@@ -201,7 +232,13 @@ public class Main {
         }
         if(!found) System.out.println("Aucun enfant.");
     }
-
+    /**
+     * Commande MARRIED : Affiche l'époux ou l'épouse d'un individu
+     *
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     //Pour la commande MARRIED
     private static void showSpouse(GedcomGraph graph, String nom) throws NameNotFoundException {                 //méthode pour la commande MARRIED
         Individu i = graph.searchByName(nom);
@@ -222,7 +259,12 @@ public class Main {
             }
         }
     }
-
+    /**
+     * Commande FAMC : Affiche les infos de la famille où l'individu est renseigné comme enfant.
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     //Pour la commande FAMC
     private static void showChildFamilyInfo(GedcomGraph graph, String nom) throws NameNotFoundException {               //méthode pour la commande FAMC
         Individu i = graph.searchByName(nom);
@@ -234,9 +276,11 @@ public class Main {
         }
         System.out.println(famC.toString());
     }
-
+    /**
+     * affiche toutes les commandes réalisable dans le main.
+     */
     //Affiche toutes les commandes
-    private static void showCommand(){                                                      //méthode pour affichager les commandes
+    private static void showCommand(){                                                      //méthode pour afficher les commandes
         System.out.println("\n===== SYSTEME DE GENEALOGIE =====");
         System.out.println("\n===== OPTION DE RECHERCHE =====");
         System.out.println(" INFO <Nom>      : Détails d'une personne");

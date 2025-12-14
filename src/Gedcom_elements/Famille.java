@@ -6,6 +6,9 @@ import java.util.List;
 import Gedcom_Tag.TagDate;
 import Gedcom_Exceptions.*;
 
+/**
+ * Classe pour gérer les familles
+ */
 public class Famille extends GedcomEntity {
 
     private String HUSB;
@@ -84,7 +87,6 @@ public class Famille extends GedcomEntity {
         this.WIFE = id;
     }
 
-    //EXCEPTION ENLEVÉ CAR GÉRÉE AILLEURS, SINON CONFLIT
     public void addEnfant(String idEnfant) {
         this.CHIL.add(idEnfant);
     }
@@ -93,6 +95,10 @@ public class Famille extends GedcomEntity {
         this.multimediaTag = multimedia;
     }
 
+    /**
+     * réécriture du toStriing pour avoir les informations.
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

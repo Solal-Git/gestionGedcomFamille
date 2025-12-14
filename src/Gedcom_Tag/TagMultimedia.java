@@ -1,7 +1,9 @@
 package Gedcom_Tag;
 
 import Gedcom_elements.*;
-
+/**
+ * classe pour la gestion des tagMultimédia (donc des fichiers externes)
+ */
 public class TagMultimedia extends GedcomTag {
 
     private String format; // Tag FORM
@@ -22,6 +24,10 @@ public class TagMultimedia extends GedcomTag {
         this.fichier = fichier;
     }
 
+    /**
+     * récriture de la méthode abstraite
+     * @return
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

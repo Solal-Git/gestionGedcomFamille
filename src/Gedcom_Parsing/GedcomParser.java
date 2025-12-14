@@ -78,7 +78,6 @@ public class GedcomParser {
             }
         }
 
-        // --- NIVEAU 1 ---
         else if (line.level == 1) {
             lastTagLevel1 = line.tag; // On mémorise le tag (ex: BIRT ou OBJE)
 

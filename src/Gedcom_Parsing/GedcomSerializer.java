@@ -3,8 +3,16 @@ package Gedcom_Parsing;
 import Gedcom_elements.GedcomGraph;
 import java.io.*;
 
+/**
+ * Classe pour le save les documents
+ */
 public class GedcomSerializer {
-
+    /**
+     * Méthode pour save les documents .ser dans Save/
+     * @param graph
+     * @param filesName
+     * @throws IOException
+     */
     public static void save(GedcomGraph graph, String filesName) throws IOException {
         if (!filesName.endsWith(".ser")) {
             filesName += ".ser";
@@ -15,6 +23,14 @@ public class GedcomSerializer {
             System.out.println(">> Sauvegarde réussie dans : " + filesName);
         }
     }
+
+    /**
+     * Méthode pour load des fichiers .ser de Save/
+     * @param filesName
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
 
     public static GedcomGraph load(String filesName) throws IOException, ClassNotFoundException {
         if (!filesName.endsWith(".ser")) {

@@ -151,8 +151,6 @@ public class GedcomGraph implements Serializable {
                 rapport.add(e.getMessage());
             }
         }
-
-        // --- BLOC 3 : DÉTECTION DE CYCLES ---
         try {
             findCycles();
         }
