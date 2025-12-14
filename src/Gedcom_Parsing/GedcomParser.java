@@ -6,6 +6,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * Classe qui gère la lecture du fichier
+ */
 public class GedcomParser {
     private GedcomGraph graph;
     private Individu currentIndividu = null;
@@ -13,10 +16,19 @@ public class GedcomParser {
     private String lastTagLevel1 = "";
     private TagMultimedia currentMultimedia = null; // Pour construire l'objet petit à petit
 
+    /**
+     * Constructeur du graphe qui va recevoir les données
+     */
     public GedcomParser() {
         this.graph = new GedcomGraph();
     }
 
+    /**
+     * Lecture fichier
+     * @param filePath
+     * @return
+     * @throws IOException
+     */
     public GedcomGraph parse(String filePath) throws IOException {
 
         this.graph = new GedcomGraph();
@@ -34,7 +46,9 @@ public class GedcomParser {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty()) continue;
+                if (line.isEmpty()) {
+                    continue;
+                }
                 ParsedLine parsed = analyzeLine(line);
                 processLine(parsed);
             }
@@ -44,6 +58,10 @@ public class GedcomParser {
         return graph;
     }
 
+    /**
+     * Initialise nos individus et familles avec les attributs
+     * @param line
+     */
     private void processLine(ParsedLine line) {
         if (line.level == 0) {
             currentIndividu = null;
@@ -71,12 +89,7 @@ public class GedcomParser {
                     case "SEX":
                         currentIndividu.setSex(new TagSexe(line.value)); break;
                     case "FAMC":
-                        if (currentIndividu.getFamcId() != null) {
-                            System.out.println("[ALERTE PARSER] IsAlreadyChildErr : L'individu "
-                                    + currentIndividu.getID() + " a plusieurs parents (FAMC). "
-                                    + currentIndividu.getFamcId() + " est écrasé par " + line.value);
-                        }
-                        currentIndividu.setFamcId(line.value);
+                        currentIndividu.addFamcId(line.value);
                         break;
                     case "FAMS":
                         currentIndividu.addFamsId(line.value); break;
@@ -126,14 +139,25 @@ public class GedcomParser {
             }
             if ("OBJE".equals(lastTagLevel1) && currentMultimedia != null) {
                 switch (line.tag) {
-                    case "FILE": currentMultimedia.setFichier(line.value); break;
-                    case "TITL": currentMultimedia.setTitre(line.value); break;
-                    case "FORM": currentMultimedia.setFormat(line.value); break;
+                    case "FILE":
+                        currentMultimedia.setFichier(line.value);
+                        break;
+                    case "TITL":
+                        currentMultimedia.setTitre(line.value);
+                        break;
+                    case "FORM":
+                        currentMultimedia.setFormat(line.value);
+                        break;
                 }
             }
         }
     }
 
+    /**
+     * Analyse la ligne en détails et renvoie au lecteur
+     * @param rawLine
+     * @return
+     */
     private ParsedLine analyzeLine(String rawLine) {
         String[] parts = rawLine.split(" ", 3);
         int level = Integer.parseInt(parts[0]);
@@ -143,20 +167,36 @@ public class GedcomParser {
 
         if (parts.length > 1 && parts[1].startsWith("@")) {
             id = parts[1];
-            if (parts.length > 2) tag = parts[2];
+            if (parts.length > 2){
+                tag = parts[2];
+            }
         } else {
-            if (parts.length > 1) tag = parts[1];
-            if (parts.length > 2) value = parts[2];
+            if (parts.length > 1) {
+                tag = parts[1];
+            }
+            if (parts.length > 2) {
+                value = parts[2];
+            }
         }
         return new ParsedLine(level, tag, value, id);
     }
 
+    /**
+     * Classe privée utilisé pour le parsing
+     */
     private static class ParsedLine {
         int level;
         String tag;
         String value;
         String id;
 
+        /**
+         * Constructeur de la classe utilisé par GedComParser
+         * @param level
+         * @param tag
+         * @param value
+         * @param id
+         */
         public ParsedLine(int level, String tag, String value, String id) {
             this.level = level;
             this.tag = tag;

@@ -5,8 +5,8 @@ import Gedcom_elements.*;
 public class TagMultimedia extends GedcomTag {
 
     private String format; // Tag FORM
-    private String title;  // Tag TITL
-    private String file;
+    private String titre;  // Tag TITL
+    private String fichier;
 
     public TagMultimedia() {
         super(1, "OBJE", null);
@@ -16,23 +16,25 @@ public class TagMultimedia extends GedcomTag {
         this.format = format;
     }
     public void setTitre(String titre) {
-        this.title = titre;
+        this.titre = titre;
     }
     public void setFichier(String fichier) {
-        this.file = fichier;
-    }
-
-    @Override
-    public void attribuateIndividu(GedcomEntity entity) {
-        if (entity instanceof Individu) {
-            ((Individu) entity).setMultimedia(this);
-        } else if (entity instanceof Famille) {
-            ((Famille) entity).setMultimedia(this);
-        }
+        this.fichier = fichier;
     }
 
     @Override
     public String toString() {
-        return "Média: " + (title != null ? title : "Sans titre") + " [" + (file != null ? file : "?") + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n  [MEDIA] ");
+        if (titre != null){
+            sb.append(titre).append(" ");
         }
+        if (fichier != null){
+            sb.append("(").append(fichier).append(")");
+        }
+        if (format != null){
+            sb.append(format).append(" ");
+        }
+        return sb.toString();
+    }
 }

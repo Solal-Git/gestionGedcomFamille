@@ -13,11 +13,15 @@ public class Individu extends GedcomEntity {
     private String famcId;
     private List<String> famsIds = new ArrayList<>();
 
+    //pour l'exception IsAlreadyChild
+    private List<String> declarationsFamc;
+
     private transient Famille familleParentObj;
     private transient List<Famille> famillesPropresObj = new ArrayList<>();
 
     public Individu(String id) {
         super(0, "INDI", null, id);
+        this.declarationsFamc = new ArrayList<>();
     }
 
     public TagDate getBirthTag() {
@@ -28,10 +32,28 @@ public class Individu extends GedcomEntity {
         this.birthTag = birthTag;
     }
 
-    public void setBirthDate(String birthDate) {}
+    public void setBirthDate(String birthDate) {
+        this.birthTag = new TagDate(birthDate);
+    }
 
     public String getFamcId() {
         return famcId;
+    }
+
+    public TagMultimedia getMultimediaTag() {
+        return multimediaTag;
+    }
+
+    public void addFamcId(String id) {
+        this.declarationsFamc.add(id);
+
+        if (this.famcId == null) {
+            this.famcId = id;
+        }
+    }
+
+    public int getNbParentsDeclares() {
+        return this.declarationsFamc.size();
     }
 
     public List<String> getFamsIds() {
@@ -59,7 +81,7 @@ public class Individu extends GedcomEntity {
     }
 
     public void setFamcId(String famcId) {
-        this.famcId = famcId;
+        addFamcId(famcId);
     }
 
     public void addFamsId(String famsId) {

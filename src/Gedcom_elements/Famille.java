@@ -112,10 +112,10 @@ public class Famille extends GedcomEntity {
         }
         sb.append("\n");
         if (dateMariage != null) {
-            sb.append(" Marriage   : ").append(dateMariage.toString()).append("\n");
+            sb.append(" Mariage   : ").append(dateMariage.toString()).append("\n");
         }
         else {
-            sb.append(" Marriage   : UNKONW  \n");
+            sb.append(" Mariage   : UNKNOW  \n");
         }
         sb.append(" Enfants: ");
         if (enfantsObj != null && !enfantsObj.isEmpty()) {

@@ -1,7 +1,14 @@
 package Gedcom_Exceptions;
 
-//ERREUR DE LOGIQUE : PERE AU LIEU DE MERE....
+/**
+ * Exception DE LOGIQUE
+ */
 public class LogicException extends GedcomNatException {
+
+    /**
+     * Constructeur de l'exception
+     * @param message
+     */
     public LogicException(String message) {
         super("LogicErr-" + message);
     }

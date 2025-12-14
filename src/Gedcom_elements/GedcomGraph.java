@@ -7,76 +7,98 @@ import java.util.HashMap;
 import java.util.Map;
 import Gedcom_Exceptions.*;
 
+/**
+ * Classe qui gère le graphe
+ */
 public class GedcomGraph implements Serializable {
 
     private static final long serialVersionUID = 1L;        //version du ficchier pour la sérialisation
-
     private Map<String, Individu> mapIndividus;
     private Map<String, Famille> mapFamilles;
 
+    /**
+     * Constructeur de graphe
+     */
     public GedcomGraph() {
         this.mapIndividus = new HashMap<>();
         this.mapFamilles = new HashMap<>();
     }
-    //adder
+
+    /**
+     * Ajoute un individu à la map
+     * @param i
+     */
     public void addIndividual(Individu i) {
         mapIndividus.put(i.getID(), i);
     }
 
+    /**
+     * Ajoute une famille à la map
+     * @param f
+     */
     public void addFamilly(Famille f) {
         mapFamilles.put(f.getID(), f);
     }
 
-    //Getter
+    /**
+     * Retourne un individu donné
+     * @param id
+     * @return
+     */
     public Individu getIndividual(String id) {
         return mapIndividus.get(id);
     }
 
+    /**
+     * Retourne une famille donnée
+     * @param id
+     * @return
+     */
     public Famille getFamilly(String id) {
         return mapFamilles.get(id);
     }
 
-
+    /**
+     *Construit le graphe et vérifie les exceptions
+     * @return
+     */
     public List<String> buildAndValidGraph() {
         List<String> rapport = new ArrayList<>();
 
-        // Copie de la liste pour éviter les erreurs si on ajoute des familles pendant la boucle
+        //Copie de la liste pour éviter les erreurs si on ajoute des familles pendant la boucle
         List<Individu> tousLesIndividus = new ArrayList<>(mapIndividus.values());
         List<Famille> toutesLesFamilles = new ArrayList<>(mapFamilles.values());
 
         for (Individu indiv : tousLesIndividus) {
 
-            // --- BLOC 1 : VÉRIFICATION STRUCTURELLE (Liens Parents) ---
+            //Je vérifie les erreurs de structures
             try {
-                checkChildLink(indiv); // LANCE l'erreur vers le catch ci-dessous
+                checkChildLink(indiv);
             }
             catch (IsAlreadyChildException e) {
-                // CAS : L'enfant a déjà une famille -> On signale et on ignore
-                rapport.add("[ALERTE] " + e.getMessage() + " -> Second lien ignoré.");
+                //L'enfant a déjà une famille
+                rapport.add(e.getMessage() + " -> Second lien ignoré.");
             }
             catch (RefMissingException e) {
-                // CAS : La famille pointée par FAMC n'existe pas -> On crée
-                rapport.add("[RÉPARATION] " + e.getMessage() + " -> Famille créée.");
+                //La famille pointée par FAMC n'existe pas
+                rapport.add(e.getMessage() + " -> Famille créée.");
 
-                // On vérifie si c'est bien une FAMILLE qui manque (selon ta classe RefMissing)
-                // Si tu n'as pas ajouté le champ "type", on suppose que c'est une famille ici par contexte
                 Famille newF = new Famille(e.getId());
                 addFamilly(newF);
 
-                // On force les liens
+                //On crée les liens de la nouvelle famille
                 try {
                     newF.addEnfant(indiv.getID());
-                } catch (Exception ex) {}
+                }
+                catch (Exception ex) {}
 
                 newF.addEnfantObj(indiv);
                 indiv.setFamilleParentObj(newF);
             }
             catch (LinkIncoherentException e) {
-                // CAS : La famille existe mais n'a pas listé l'enfant -> On ajoute
-                rapport.add("[RÉPARATION] " + e.getMessage() + " -> Lien réciproque ajouté.");
+                //La famille existe mais n'a pas listé l'enfant
+                rapport.add(e.getMessage() + " -> Lien manquant ajouté.");
 
-                // Note : Ta classe LinkIncoherentException doit avoir une méthode pour récupérer la Famille
-                // Si tu ne l'as pas mise, utilise mapFamilles.get(e.getLinkIdFrom())
                 Famille f = e.getFam();
                 if(f != null) {
                     try {
@@ -91,31 +113,27 @@ public class GedcomGraph implements Serializable {
                 e.printStackTrace();
             }
 
-            // --- BLOC 2 : VÉRIFICATION SÉMANTIQUE (Genre, Conjoint) ---
+            //Je vérifie la logique du .ged
             try {
                 checkSpouseLink(indiv);
             }
             catch (GenderMissMatchException e) {
-                // On signale l'erreur de genre
-                rapport.add("[ALERTE GENRE] " + e.getMessage());
+                rapport.add(e.getMessage());
             }
             catch (RefMissingException e) {
-                // --- CORRECTION ICI : ON FAIT PAREIL QUE POUR FAMC ---
-                rapport.add("[RÉPARATION] " + e.getMessage() + " -> Famille créée.");
+                rapport.add(e.getMessage() + " -> Famille créée.");
 
-                // 1. On crée la famille manquante
                 Famille newF = new Famille(e.getId());
                 addFamilly(newF);
 
-                // 2. On lie l'individu à cette famille
                 indiv.addFamillePropreObj(newF);
 
-                // 3. On essaie de deviner si c'est le mari ou la femme
-                String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "?";
+                String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "UNKNOW";
                 if ("M".equals(sexe)) {
                     newF.setMari(indiv.getID());
                     newF.setMariObj(indiv);
-                } else if ("F".equals(sexe)) {
+                }
+                else if ("F".equals(sexe)) {
                     newF.setFemme(indiv.getID());
                     newF.setFemmeObj(indiv);
                 }
@@ -128,23 +146,31 @@ public class GedcomGraph implements Serializable {
         for (Famille f : toutesLesFamilles) {
             try {
                 checkTwiceChild(f);
-            } catch (TwiceChildException e) {
-                rapport.add("[ALERTE DOUBLON] " + e.getMessage());
+            }
+            catch (TwiceChildException e) {
+                rapport.add(e.getMessage());
             }
         }
 
         // --- BLOC 3 : DÉTECTION DE CYCLES ---
         try {
             findCycles();
-        } catch (GenealogyException e) {
-            rapport.add("[ERREUR GRAVE CYCLE] " + e.getMessage());
-        } catch (Exception e) {
+        }
+        catch (GenealogyException e) {
+            rapport.add(e.getMessage());
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
 
         return rapport;
     }
 
+    /**
+     * Vérifie l'exception TwiceChildException
+     * @param f
+     * @throws TwiceChildException
+     */
     private void checkTwiceChild(Famille f) throws TwiceChildException {
         List<String> enfants = f.getEnfantsIds();
         List<String> enfantsVus = new ArrayList<>();
@@ -157,7 +183,19 @@ public class GedcomGraph implements Serializable {
         }
     }
 
+    /**
+     * Vérifie les exceptions pour les enfants
+     * @param indiv
+     * @throws RefMissingException
+     * @throws LinkIncoherentException
+     * @throws IsAlreadyChildException
+     */
     private void checkChildLink(Individu indiv) throws RefMissingException, LinkIncoherentException, IsAlreadyChildException {
+        if (indiv.getNbParentsDeclares() > 1) {
+            throw new IsAlreadyChildException("L'individu " + indiv.getID() +
+                    " déclare " + indiv.getNbParentsDeclares() + " familles parentales.");
+        }
+
         if (indiv.getFamilleParentObj() != null) {
             throw new IsAlreadyChildException("L'individu " + indiv.getID() + " est déjà lié à la famille " + indiv.getFamilleParentObj().getID());
         }
@@ -165,26 +203,27 @@ public class GedcomGraph implements Serializable {
         String idFam = indiv.getFamcId();
         if (idFam == null) return;
 
-        // 1. Chercher la famille
         Famille f = mapFamilles.get(idFam);
         if (f == null) {
-            // Pas de Try-Catch ici ! On lance l'erreur !
             throw new RefMissingException("Famille parentale " + idFam + " introuvable pour " + indiv.getID(), idFam, "FAM");
         }
 
-        // 2. Vérifier la réciprocité
         if (!f.getEnfantsIds().contains(indiv.getID())) {
             throw new LinkIncoherentException("Famille " + idFam + " ne connait pas son enfant " + indiv.getID(), indiv, f);
         }
 
-        // 3. Si tout va bien, on lie les objets
         indiv.setFamilleParentObj(f);
         if (!f.getEnfantsObj().contains(indiv)) {
             f.addEnfantObj(indiv);
         }
     }
 
-
+    /**
+     * Vérifie les exceptions pour les adultes
+     * @param indiv
+     * @throws GenderMissMatchException
+     * @throws RefMissingException
+     */
     protected void checkSpouseLink(Individu indiv) throws GenderMissMatchException, RefMissingException {
         for (String idFam : indiv.getFamsIds()) {
             Famille f = mapFamilles.get(idFam);
@@ -194,14 +233,21 @@ public class GedcomGraph implements Serializable {
 
             indiv.addFamillePropreObj(f);
             String sexe;
-            if (indiv.getSexTag().toString() != "UNKNOW") {
+            if (indiv.getSexTag() != null) {
                 sexe = indiv.getSexTag().toString();
             } else {
                 sexe = "UNKNOW";
             }
 
+            if (indiv.getID().equals(f.getMariId())) {
+                f.setMariObj(indiv);
+            }
+            else if (indiv.getID().equals(f.getFemmeId())) {
+                f.setFemmeObj(indiv);
+            }
+
             //Le sexe n'est pas renseigné
-            if (sexe == "UNKNOW") {
+            if ("UNKNOW".equals(sexe)) {
                 throw new GenderMissMatchException("L'individu" + indiv.getID() + "N'a pas de sexe déclaré on ne peut donc pas vérifier si c'est bon");
             }
 
@@ -210,7 +256,6 @@ public class GedcomGraph implements Serializable {
                 if ("F".equals(sexe)) {
                     throw new GenderMissMatchException("Une FEMME (" +indiv.getID()+ ") est déclarée comme MARI dans " + f.getID());
                 }
-                f.setMariObj(indiv);
             }
 
             // un époux est déclaré en tant qu'épouse
@@ -218,16 +263,21 @@ public class GedcomGraph implements Serializable {
                 if ("M".equals(sexe)) {
                     throw new GenderMissMatchException("Un HOMME ("+indiv.getID()+") est déclaré comme FEMME dans " + f.getID());
                 }
-                f.setFemmeObj(indiv);
             }
         }
     }
 
+    /**
+     * Vérifie si le nom recherché est existant
+     * @param recherche
+     * @return
+     * @throws NameNotFoundException
+     */
     public Individu searchByName(String recherche) throws NameNotFoundException {
         String rechercheLower = recherche.toLowerCase();
 
         for (Individu i : mapIndividus.values()) {
-            if (i.getNameTag().toString() != "UNKNOW") {
+            if (i.getNameTag() != null && !"UNKNOW".equals(i.getNameTag().toString())) {
                 String fullName = i.getNameTag().toString().toLowerCase();
                 if (fullName.contains(rechercheLower)) {
                     return i;
@@ -237,6 +287,10 @@ public class GedcomGraph implements Serializable {
         throw new NameNotFoundException("L'individu avec le nom '" + recherche + "' est introuvable dans le graphe.");
     }
 
+    /**
+     * Vérifie si un cycle est présent en appelant checkAncestors
+     * @throws GenealogyException
+     */
     private void findCycles() throws GenealogyException {               //initialise toutes la recherche du cycle
         for (Individu indiv : mapIndividus.values()) {
             ArrayList<String> cheminInitial = new ArrayList<>();
@@ -245,6 +299,13 @@ public class GedcomGraph implements Serializable {
         }
     }
 
+    /**
+     * Appelle checkParents
+     * @param cible
+     * @param courant
+     * @param chemin
+     * @throws GenealogyException
+     */
     private void checkAncestors(Individu cible, Individu courant, ArrayList<String> chemin) throws GenealogyException {
         if (courant == null) return;
         Famille f = courant.getFamilleParentObj();                  //récupérer le pere et la mere de la famille
@@ -255,6 +316,13 @@ public class GedcomGraph implements Serializable {
         }
     }
 
+    /**
+     *  Vérifie si un enfant et parent de lui même
+     * @param cible
+     * @param parent
+     * @param chemin
+     * @throws GenealogyException
+     */
     private void checkParents(Individu cible, Individu parent, ArrayList<String> chemin) throws GenealogyException {
         if (parent != null) {
             try {

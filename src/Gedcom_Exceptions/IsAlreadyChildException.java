@@ -1,8 +1,15 @@
 package Gedcom_Exceptions;
 
 
-//UN ENFANT EST L'ENFANT D'UNE SEULE FAMILLE
+/**
+ * Exception : UN ENFANT EST L'ENFANT D'UNE SEULE FAMILLE
+ */
 public class IsAlreadyChildException extends StructureException {
+
+    /**
+     * Constructeur de l'exception
+     * @param message
+     */
     public IsAlreadyChildException(String message) {
         super("IsAlreadyChildErr : " + message);
     }

@@ -8,13 +8,6 @@ public class TagName extends GedcomTag {
     }
 
     @Override
-    public void attribuateIndividu(GedcomEntity E) {        //attribuer le nom d'un Individu
-        if (E instanceof Individu I) {
-            I.setName(this);
-        }
-    }
-
-    @Override
     public String toString() {
         return value.replace("/", "");
     }   //avoir le name en string

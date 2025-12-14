@@ -8,13 +8,6 @@ public class TagSexe extends GedcomTag {
     }
 
     @Override
-    public void attribuateIndividu(GedcomEntity E) {        //attribuer le sexe d'un Individu
-        if (E instanceof Individu I) {
-            I.setSex(this);
-        }
-    }
-
-    @Override
     public String toString() {          // redéfinition de toString pour avoir le sexe en string
         if ("M".equals(value)) {
             return "M";

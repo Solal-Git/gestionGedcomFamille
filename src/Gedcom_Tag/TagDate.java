@@ -1,10 +1,10 @@
 package Gedcom_Tag;
 import Gedcom_elements.*;
 
-public class TagDate extends GedcomEntity {
+public class TagDate extends GedcomTag {
 
     public TagDate(String value) {      //tag DATE
-        super(2, "DATE",value, null);
+        super(2, "DATE",value);
 
     }
 

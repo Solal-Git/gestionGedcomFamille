@@ -1,8 +1,14 @@
 package Gedcom_Exceptions;
 
-//AU NIVEAU DU GED : LIEN MANQUANT, ABSENCE
+/**
+ * Exception AU NIVEAU DU GED : LIEN MANQUANT, ABSENCE
+ */
 public class StructureException extends GedcomNatException{
 
+    /**
+     * Constructeur de l'exception
+     * @param message
+     */
     public StructureException(String message) {
         super("StructureErr-" + message);
     }

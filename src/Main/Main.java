@@ -44,7 +44,7 @@ public class Main {
 
             } catch (Exception e) {
                 System.out.println("Pas de fichier trouvé.");
-                System.out.println("vérifié le nom du fichier mais aussi son emplacement.");
+                System.out.println("Vérifiez le nom du fichier mais aussi son emplacement.");
             }
         }
 
@@ -68,13 +68,13 @@ public class Main {
                     case "EXIT":                    //quitte tout
                         running = false;
                         break;
-
+                    //CAS OU ON DEMANDE UNE FAMILLE D'UN PARENT QUI N'EN A PAS NON GERE
                     case "FAMC" :
                         if (graph != null) {
                             showChildFamilyInfo(graph, arg);
                         }
                         else {
-                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
+                            System.out.println("Il n'existe pas de graphe encore, il faut LOAD une sauvegarde existante.");     //si skip  et que le graphe est encore null
                         }
                         break;
 
@@ -83,7 +83,7 @@ public class Main {
                             showSpouse(graph, arg);
                         }
                         else {
-                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde existante.");     //si skip  et que le graphe est encore null
                         }
                         break;
                     case "INFO":
@@ -91,7 +91,7 @@ public class Main {
                             showInfo(graph, arg);
                         }
                         else {
-                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde existante.");     //si skip  et que le graphe est encore null
                         }
                         break;
 
@@ -100,7 +100,7 @@ public class Main {
                             showChild(graph, arg);
                         }
                         else {
-                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde.");     //si skip  et que le graphe est encore null
+                            System.out.println("Il n'existe pas de graph encore il faut LOAD une sauvegarde existante.");     //si skip  et que le graphe est encore null
                         }
                         break;
 
@@ -109,7 +109,7 @@ public class Main {
                             GedcomSerializer.save(graph, arg);
                         }
                         else {
-                            System.out.println("Erreur : précisez un nom de fichier (ex: SAVE data)");
+                            System.out.println("Erreur : précisez un nom de fichier existant");
                         }
                         break;
 
@@ -121,7 +121,7 @@ public class Main {
                                 List<String> rapport = graph.buildAndValidGraph();
                                 afficherRapport(rapport);
                             }
-                            System.out.println("Graphe chargé.");
+                            System.out.println("Graphe chargé avec succès.");
                         }
                         else {
                             System.out.println("Erreur : précisez un nom de fichier.");
@@ -168,7 +168,7 @@ public class Main {
     //Va afficher les erreurs
     private static void afficherRapport(List<String> rapport) {
         if (rapport == null || rapport.isEmpty()) {
-            System.out.println(">> Graphe sain. Aucune incohérence détectée.");
+            System.out.println(">> Graphe de logique et structure correcte.");
         } else {
             System.out.println("\n/!\\ RAPPORT D'ANALYSE ET CORRECTION /!\\");
             System.out.println("--------------------------------------------------");
@@ -226,10 +226,10 @@ public class Main {
     //Pour la commande FAMC
     private static void showChildFamilyInfo(GedcomGraph graph, String nom) throws NameNotFoundException {               //méthode pour la commande FAMC
         Individu i = graph.searchByName(nom);
-        Famille famC = graph.getFamilly(i.getFamcId());
+        Famille famC = i.getFamilleParentObj();
         System.out.println(famC.getFemmeId());
         if (famC == null) {
-            System.out.println("Erreur, cette personne n'a pas de famille où il est renseigné comme enfant eregistré");
+            System.out.println("Erreur, cette personne n'a pas de famille où il est renseigné comme enfant enregistré");
             return;
         }
         System.out.println(famC.toString());
