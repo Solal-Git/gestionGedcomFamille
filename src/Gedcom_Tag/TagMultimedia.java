@@ -2,11 +2,14 @@ package Gedcom_Tag;
 
 import Gedcom_elements.*;
 
+/**
+ * Gestion des supports multimédia (Pas vérifié si la fonctionnalité marche)
+ */
 public class TagMultimedia extends GedcomTag {
 
     private String format; // Tag FORM
-    private String titre;  // Tag TITL
-    private String fichier;
+    private String title;  // Tag TITL
+    private String file;
 
     public TagMultimedia() {
         super(1, "OBJE", null);
@@ -16,25 +19,18 @@ public class TagMultimedia extends GedcomTag {
         this.format = format;
     }
     public void setTitre(String titre) {
-        this.titre = titre;
+        this.title = titre;
     }
     public void setFichier(String fichier) {
-        this.fichier = fichier;
+        this.file = fichier;
     }
 
+    /**
+     * Réecriture de la fonction to String pour afficher le contenu multimédia.
+     * @return
+     */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n  [MEDIA] ");
-        if (titre != null){
-            sb.append(titre).append(" ");
+        return "Média: " + (title != null ? title : "Sans titre") + " [" + (file != null ? file : "?") + "]";
         }
-        if (fichier != null){
-            sb.append("(").append(fichier).append(")");
-        }
-        if (format != null){
-            sb.append(format).append(" ");
-        }
-        return sb.toString();
-    }
 }
