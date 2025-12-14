@@ -2,6 +2,9 @@ package Gedcom_Tag;
 
 import Gedcom_elements.*;
 
+/**
+ * Gestion des supports multimédia (Pas vérifié si la fonctionnalité marche)
+ */
 public class TagMultimedia extends GedcomTag {
 
     private String format; // Tag FORM
@@ -22,15 +25,10 @@ public class TagMultimedia extends GedcomTag {
         this.file = fichier;
     }
 
-    @Override
-    public void attribuateIndividu(GedcomEntity entity) {
-        if (entity instanceof Individu) {
-            ((Individu) entity).setMultimedia(this);
-        } else if (entity instanceof Famille) {
-            ((Famille) entity).setMultimedia(this);
-        }
-    }
-
+    /**
+     * Réecriture de la fonction to String pour afficher le contenu multimédia.
+     * @return
+     */
     @Override
     public String toString() {
         return "Média: " + (title != null ? title : "Sans titre") + " [" + (file != null ? file : "?") + "]";

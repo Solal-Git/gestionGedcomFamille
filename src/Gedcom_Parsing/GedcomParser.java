@@ -5,18 +5,32 @@ import Gedcom_Tag.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 
-public class GedcomParser {
+/**
+ * classe pour la lecture du fichier
+ */
+public class GedcomParser implements Serializable {
     private GedcomGraph graph;
     private Individu currentIndividu = null;
     private Famille currentFamille = null;
     private String lastTagLevel1 = "";
     private TagMultimedia currentMultimedia = null; // Pour construire l'objet petit à petit
+    private static final long serialVersionUID = 1L;
 
     public GedcomParser() {
         this.graph = new GedcomGraph();
     }
 
+    /**
+     * Fonction pour construire le graphe
+     * <p>
+     *     appelle récursive de process line (qui lit le fichier)
+     * </p>
+     * @param filePath
+     * @return
+     * @throws IOException
+     */
     public GedcomGraph parse(String filePath) throws IOException {
 
         this.graph = new GedcomGraph();
@@ -44,11 +58,18 @@ public class GedcomParser {
         return graph;
     }
 
+    /**
+     * Méthode pour lire le fichier
+     * <p>
+     *     le parametre est l'information de la ligne, en fonction de ses informations, elle réagit différement.
+     * </p>
+     * @param line
+     */
     private void processLine(ParsedLine line) {
         if (line.level == 0) {
             currentIndividu = null;
             currentFamille = null;
-            lastTagLevel1 = ""; // Reset
+            lastTagLevel1 = "";
 
             if ("INDI".equals(line.tag)) {
                 currentIndividu = new Individu(line.id);
@@ -134,6 +155,14 @@ public class GedcomParser {
         }
     }
 
+    /**
+     * Extrait les informations d'une ligne
+     * <p>
+     *     Extrait toutes les informations d'une ligne afin de renvoyer un tableau avec toutes les infos réparti.
+     * </p>
+     * @param rawLine
+     * @return
+     */
     private ParsedLine analyzeLine(String rawLine) {
         String[] parts = rawLine.split(" ", 3);
         int level = Integer.parseInt(parts[0]);
@@ -151,6 +180,9 @@ public class GedcomParser {
         return new ParsedLine(level, tag, value, id);
     }
 
+    /**
+     * classe qui permet de structurer correctecment les données
+     */
     private static class ParsedLine {
         int level;
         String tag;

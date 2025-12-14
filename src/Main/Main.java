@@ -9,13 +9,27 @@ import java.util.Scanner;
 
 //EXÉCUTER LE CODE DEPUIS LE FICHIER DE BASE ET NON DANS LE SRC
 
+/**
+ * Classe principale de l'application
+ * <p>
+ * Classe qui gére l'interaction entre l'utilisateurs et le graphe
+ * Elle permet de gérer la sauvegarde, le chargement et d'interroger le graphe.
+ * </p>
+ */
 public class Main {
-
+    /**
+     * Point d'entrée de la classe
+     * <p>
+     *     Initialise le parser pour la lecture et l'écriture, le graph et la lecture des entrées
+     *     Point d'entrée de l'application
+     * </p>
+     * @param args
+     */
     public static void main(String[] args) {
         GedcomParser parser = new GedcomParser();
         GedcomGraph graph = null;
         Scanner scanner = new Scanner(System.in);
-
+        // boucle chargement initial
         while (graph == null) {
             System.out.println("\nQu'elle est le nom du fichier ged (sans le ged)");
             System.out.println("Le fichier doit se trouver dans le dossier In");
@@ -28,7 +42,6 @@ public class Main {
                 break;
             }
 
-            //J'AUTOMATISE POUR EVITER LES PB DE LECTURE
             if(!fileName.endsWith(".ged") && !fileName.equalsIgnoreCase("skip")) {
                 fileName += ".ged";
             }
@@ -50,7 +63,7 @@ public class Main {
 
         boolean running = true;
         showCommand();
-
+        // boucle de l'application
         while (running) {
             System.out.print("\nCommande > ");
             String input = scanner.nextLine().trim();
@@ -166,6 +179,14 @@ public class Main {
     }
 
     //Va afficher les erreurs
+
+    /**
+     * Affiche le rapport d'analyse des erreurs
+     * <p>
+     *     Méthode appelée après le chargement ou la construction du grph afin de vérifier si il y a des erreurs ou non.
+     * </p>
+     * @param rapport
+     */
     private static void afficherRapport(List<String> rapport) {
         if (rapport == null || rapport.isEmpty()) {
             System.out.println(">> Graphe sain. Aucune incohérence détectée.");
@@ -180,12 +201,27 @@ public class Main {
     }
 
     //Pour la commande INFO
+
+    /**
+     * Commande Info : Affiche les info d'un individu
+     *
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     private static void showInfo(GedcomGraph graph, String nom) throws NameNotFoundException {                       //Méthode pour la commande INFO
         Individu i = graph.searchByName(nom);
         if (i != null) System.out.println("Résultat : " + i.toString());
         else System.out.println("Introuvable.");
     }
 
+    /**
+     * Commande SIBLIGNS : affiche les frere et soeur d'un individu
+     *
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     //Pour la commande SIBLINGS
     private static void showChild(GedcomGraph graph, String nom) throws NameNotFoundException {                      //méthode pour la commande CHILD
         Individu parent = graph.searchByName(nom);
@@ -202,6 +238,13 @@ public class Main {
         if(!found) System.out.println("Aucun enfant.");
     }
 
+    /**
+     * Commande MARRIED : Affiche l'époux ou l'épouse d'un individu
+     *
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     //Pour la commande MARRIED
     private static void showSpouse(GedcomGraph graph, String nom) throws NameNotFoundException {                 //méthode pour la commande MARRIED
         Individu i = graph.searchByName(nom);
@@ -224,6 +267,13 @@ public class Main {
     }
 
     //Pour la commande FAMC
+
+    /**
+     * Commande FAMC : Affiche les infos de la famille où l'individu est renseigné comme enfant.
+     * @param graph
+     * @param nom
+     * @throws NameNotFoundException
+     */
     private static void showChildFamilyInfo(GedcomGraph graph, String nom) throws NameNotFoundException {               //méthode pour la commande FAMC
         Individu i = graph.searchByName(nom);
         Famille famC = graph.getFamilly(i.getFamcId());
@@ -236,6 +286,10 @@ public class Main {
     }
 
     //Affiche toutes les commandes
+
+    /**
+     * affiche toutes les commandes réalisable dans le main.
+     */
     private static void showCommand(){                                                      //méthode pour affichager les commandes
         System.out.println("\n===== SYSTEME DE GENEALOGIE =====");
         System.out.println("\n===== OPTION DE RECHERCHE =====");
