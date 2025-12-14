@@ -1,19 +1,21 @@
 package Gedcom_Exceptions;
+import Gedcom_elements.*;
 
-public class LinkIncoherentException extends GedcomNatException {
-    private final String LINKIDFROM;                  //Lien de A vers B existant
-    private final String LINKIDMISSING;               //Lien de B vers A manquant
+//LIEN MANQUANT ENTRE UNE FAMILLE ET UN INDIVIDU
+public class LinkIncoherentException extends LogicException {
+    private Individu i;
+    private Famille f;
 
-    public LinkIncoherentException(String message, String linkIdfrom, String linkIdmissing) {
-        super("LinkIncoherentError :" + message);
-        this.LINKIDFROM = linkIdfrom;
-        this.LINKIDMISSING = linkIdmissing;
+    public LinkIncoherentException(String message, Individu i, Famille f) {
+        super("LinkIncoherent : " + message);
+        this.i = i;
+        this.f = f;
     }
 
-    public String getLinkIdFrom() {
-        return LINKIDFROM;
+    public Individu getIndiv() {
+        return i;
     }
-    public String getLINKIDMISSING() {
-        return LINKIDMISSING;
+    public Famille getFam() {
+        return f;
     }
 }

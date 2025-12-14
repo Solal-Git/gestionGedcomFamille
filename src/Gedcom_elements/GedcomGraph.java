@@ -2,6 +2,7 @@ package Gedcom_elements;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import Gedcom_Exceptions.*;
@@ -12,6 +13,7 @@ public class GedcomGraph implements Serializable {
 
     private Map<String, Individu> mapIndividus;
     private Map<String, Famille> mapFamilles;
+
     public GedcomGraph() {
         this.mapIndividus = new HashMap<>();
         this.mapFamilles = new HashMap<>();
@@ -35,98 +37,157 @@ public class GedcomGraph implements Serializable {
     }
 
 
-    public void buildAndValidGraph() throws TwiceChildException, GenealogyException, GenderMissMatchException, RefMissingException {
-        // On parcourt tous les individus pour vérifier leurs liens parents (FAMC)
-        for (Individu indiv : mapIndividus.values()) {
-            checkChildLink(indiv);
-            checkSpouseLink(indiv);
+    public List<String> buildAndValidGraph() {
+        List<String> rapport = new ArrayList<>();
+
+        // Copie de la liste pour éviter les erreurs si on ajoute des familles pendant la boucle
+        List<Individu> tousLesIndividus = new ArrayList<>(mapIndividus.values());
+
+        for (Individu indiv : tousLesIndividus) {
+
+            // --- BLOC 1 : VÉRIFICATION STRUCTURELLE (Liens Parents) ---
+            try {
+                checkChildLink(indiv); // LANCE l'erreur vers le catch ci-dessous
+            }
+            catch (IsAlreadyChildException e) {
+                // CAS : L'enfant a déjà une famille -> On signale et on ignore
+                rapport.add("[ALERTE] " + e.getMessage() + " -> Second lien ignoré.");
+            }
+            catch (RefMissingException e) {
+                // CAS : La famille pointée par FAMC n'existe pas -> On crée
+                rapport.add("[RÉPARATION] " + e.getMessage() + " -> Famille créée.");
+
+                // On vérifie si c'est bien une FAMILLE qui manque (selon ta classe RefMissing)
+                // Si tu n'as pas ajouté le champ "type", on suppose que c'est une famille ici par contexte
+                Famille newF = new Famille(e.getId());
+                addFamilly(newF);
+
+                // On force les liens
+                try {
+                    newF.addEnfant(indiv.getID());
+                } catch (Exception ex) { /* Ignorer doublon */ }
+
+                newF.addEnfantObj(indiv);
+                indiv.setFamilleParentObj(newF);
+            }
+            catch (LinkIncoherentException e) {
+                // CAS : La famille existe mais n'a pas listé l'enfant -> On ajoute
+                rapport.add("[RÉPARATION] " + e.getMessage() + " -> Lien réciproque ajouté.");
+
+                // Note : Ta classe LinkIncoherentException doit avoir une méthode pour récupérer la Famille
+                // Si tu ne l'as pas mise, utilise mapFamilles.get(e.getLinkIdFrom())
+                Famille f = e.getFam();
+                if(f != null) {
+                    try {
+                        f.addEnfant(indiv.getID());
+                    }
+                    catch (Exception ex) {}
+                    f.addEnfantObj(indiv);
+                }
+                indiv.setFamilleParentObj(f);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // --- BLOC 2 : VÉRIFICATION SÉMANTIQUE (Genre, Conjoint) ---
+            try {
+                checkSpouseLink(indiv);
+            } catch (GenderMissMatchException e) {
+                // On signale l'erreur de genre
+                rapport.add("[ALERTE GENRE] " + e.getMessage());
+            } catch (RefMissingException e) {
+                rapport.add("[ALERTE] Famille FAMS manquante : " + e.getId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
-        findCycles();
-    }
-
-    private void checkChildLink(Individu indiv) throws TwiceChildException {
-        String idFam = indiv.getFamcId();
-        if (idFam == null) return; // Pas de parents connus, on passe
-
+        // --- BLOC 3 : DÉTECTION DE CYCLES ---
         try {
-            //Chercher la famille
-            Famille f = mapFamilles.get(idFam);
-            if (f == null) {
-                throw new RefMissingException(idFam);
-            }
-            // Vérifier la réciprocité (Est-ce que la famille connait cet enfant ?)
-            if (!f.getEnfantsIds().contains(indiv.getID())) {
-                throw new LinkIncoherentException("Lien non réciproque : Famille " + idFam + " ne liste pas l'enfant " + indiv.getID(), indiv.getID(), idFam);
-            }
-            //Tout est bon -> On lie les OBJETS
-            indiv.setFamilleParentObj(f);
-            if (!f.getEnfantsObj().contains(indiv)) {             // On s'assure que l'objet est aussi dans la liste de la famille
-                f.addEnfantObj(indiv);
-            }
-
-        } catch (RefMissingException e) { //Correction de la famille manquante
-            System.err.println("ERREUR : " + e.getMessage() + " -> Correction : Création de la famille.");
-            Famille newF = new Famille(e.getIdManquant());
-            addFamilly(newF);
-            newF.addEnfant(indiv.getID());
-            newF.addEnfantObj(indiv);
-            indiv.setFamilleParentObj(newF);
-
-        } catch (LinkIncoherentException e) {
-            System.err.println("ERREUR : " + e.getMessage() + " -> Correction : Ajout force.");
-            Famille f = mapFamilles.get(idFam);
-            f.addEnfant(indiv.getID());
-            f.addEnfantObj(indiv);
-            indiv.setFamilleParentObj(f);
+            findCycles();
+        } catch (GenealogyException e) {
+            rapport.add("[ERREUR GRAVE CYCLE] " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return rapport;
     }
+
+    private void checkChildLink(Individu indiv) throws RefMissingException, LinkIncoherentException, IsAlreadyChildException {
+        if (indiv.getFamilleParentObj() != null) {
+            throw new IsAlreadyChildException("L'individu " + indiv.getID() + " est déjà lié à la famille " + indiv.getFamilleParentObj().getID());
+        }
+
+        String idFam = indiv.getFamcId();
+        if (idFam == null) return;
+
+        // 1. Chercher la famille
+        Famille f = mapFamilles.get(idFam);
+        if (f == null) {
+            // Pas de Try-Catch ici ! On lance l'erreur !
+            throw new RefMissingException("Famille parentale " + idFam + " introuvable pour " + indiv.getID(), idFam, "FAM");
+        }
+
+        // 2. Vérifier la réciprocité
+        if (!f.getEnfantsIds().contains(indiv.getID())) {
+            throw new LinkIncoherentException("Famille " + idFam + " ne connait pas son enfant " + indiv.getID(), indiv, f);
+        }
+
+        // 3. Si tout va bien, on lie les objets
+        indiv.setFamilleParentObj(f);
+        if (!f.getEnfantsObj().contains(indiv)) {
+            f.addEnfantObj(indiv);
+        }
+    }
+
+
+    protected void checkSpouseLink(Individu indiv) throws GenderMissMatchException, RefMissingException {
+        for (String idFam : indiv.getFamsIds()) {
+            Famille f = mapFamilles.get(idFam);
+            if (f == null) {
+                // CORRECTION : Ajout du type "FAM" manquant dans ton code précédent
+                throw new RefMissingException("Famille propre " + idFam + " introuvable", idFam, "FAM");
+            }
+
+            indiv.addFamillePropreObj(f);
+            String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "?";
+
+            // Cas 1 : L'individu est listé comme le MARI
+            if (indiv.getID().equals(f.getMariId())) {
+                if ("F".equals(sexe)) {
+                    throw new GenderMissMatchException("Une FEMME (" +indiv.getID()+ ") est déclarée comme MARI dans " + f.getID());
+                }
+                f.setMariObj(indiv);
+            }
+            // Cas 2 : L'individu est listé comme la FEMME
+            else if (indiv.getID().equals(f.getFemmeId())) {
+                if ("M".equals(sexe)) {
+                    throw new GenderMissMatchException("Un HOMME ("+indiv.getID()+") est déclaré comme FEMME dans " + f.getID());
+                }
+                f.setFemmeObj(indiv);
+            }
+        }
+    }
+
     public Individu searchByName(String recherche) throws NameNotFoundException {
+        // On passe tout en minuscules pour ne pas être gêné par la casse
         String rechercheLower = recherche.toLowerCase();
 
         for (Individu i : mapIndividus.values()) {
+            // Sécurité : On vérifie que l'individu a bien un tag NAME
             if (i.getNameTag() != null) {
                 String fullName = i.getNameTag().toString().toLowerCase();
+
+                // .contains permet de trouver "Jean" si on tape juste "Je"
                 if (fullName.contains(rechercheLower)) {
                     return i;
                 }
             }
         }
-        throw new NameNotFoundException(recherche);
-    }
-    private void checkSpouseLink(Individu indiv) throws GenderMissMatchException, RefMissingException {
-        for (String idFam : indiv.getFamsIds()) {
-            try {
-                Famille f = mapFamilles.get(idFam);
-                if (f == null) throw new RefMissingException(idFam);
-                indiv.addFamillePropreObj(f);
-                String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "?";
-
-                // Cas 1 : L'individu est listé comme le MARI
-                if (indiv.getID().equals(f.getMariId())) {
-                    if ("F".equals(sexe)) { // Si c'est une femme
-                        throw new GenderMissMatchException(" Incohérence: Une femme est déclarée comme Mari dans la famille " + f.getID(), null, indiv.getID(), sexe, "HUSB");
-                    }
-                    f.setMariObj(indiv);
-                }
-                // Cas 2 : L'individu est listé comme la FEMME
-                else if (indiv.getID().equals(f.getFemmeId())) {
-                    if ("M".equals(sexe)) { // Si c'est un homme
-                        throw new GenderMissMatchException(" Incohérence: Un homme est déclaré comme Femme dans la famille " + f.getID(), null, indiv.getID(), sexe, "WIFE");
-                    }
-                    f.setFemmeObj(indiv);
-                }
-
-            } catch (GenderMissMatchException e) {
-                System.err.println("Erreur (Genre) : " + e.getMessage());
-            } catch (RefMissingException e) {
-                throw new RefMissingException(e.getMessage());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        // Si la boucle se termine sans résultat, on lance l'erreur
+        throw new NameNotFoundException("L'individu avec le nom '" + recherche + "' est introuvable dans le graphe.");
     }
 
     private void findCycles() throws GenealogyException {               //initialise toutes la recherche du cycle
@@ -152,7 +213,7 @@ public class GedcomGraph implements Serializable {
             try {
                 if (parent.getID().equals(cible.getID())) {
                     chemin.add(parent.getID());                     //on ajt au chemin l'id si il est égale a l'id cible(donc cycle)
-                    throw new GenealogyException(chemin, "L'individu " + cible.getID() + " tourne en rond !");
+                    throw new GenealogyException("L'individu " + cible.getID() + " tourne en rond !", chemin);
                 }
                 if (!chemin.contains(parent.getID())) {
                     ArrayList<String> nouveauChemin = new ArrayList<>(chemin);  //sinon on relance récursirvement avec un nouveau chemin et un nouvelle individu
@@ -161,10 +222,12 @@ public class GedcomGraph implements Serializable {
                 }
             }
             catch (GenealogyException e) {
-                throw new GenealogyException(e.getCYCLE(), e.getMessage());         //récup l'erreur si il y a un cycle
+                throw new GenealogyException(e.getMessage(), e.getCycle());         //récup l'erreur si il y a un cycle
             }
         }
     }
+
+
 
     @Override
     public String toString() {

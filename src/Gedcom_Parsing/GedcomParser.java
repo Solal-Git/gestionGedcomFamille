@@ -1,9 +1,5 @@
 package Gedcom_Parsing;
 
-import Gedcom_Exceptions.GenderMissMatchException;
-import Gedcom_Exceptions.GenealogyException;
-import Gedcom_Exceptions.RefMissingException;
-import Gedcom_Exceptions.TwiceChildException;
 import Gedcom_elements.*;
 import Gedcom_Tag.*;
 import java.io.BufferedReader;
@@ -18,10 +14,15 @@ public class GedcomParser {
     private TagMultimedia currentMultimedia = null; // Pour construire l'objet petit à petit
 
     public GedcomParser() {
-        graph = new GedcomGraph();
+        this.graph = new GedcomGraph();
     }
 
-    public GedcomGraph parse(String filePath) throws IOException, TwiceChildException, GenealogyException, GenderMissMatchException, RefMissingException {
+    public GedcomGraph parse(String filePath) throws IOException {
+
+        this.graph = new GedcomGraph();
+        this.currentIndividu = null;
+        this.currentFamille = null;
+
         //J'AI MIS LES 2 POUR DEBUG LE LOAD ET LE IMPORT
         if (!filePath.equals("In/" + filePath)) {
             filePath = "In/" + filePath;
@@ -39,7 +40,6 @@ public class GedcomParser {
             }
         }
 
-        graph.buildAndValidGraph();
 
         return graph;
     }
@@ -88,7 +88,7 @@ public class GedcomParser {
                     case "CHIL":
                         try {
                             currentFamille.addEnfant(line.value);
-                        } catch (TwiceChildException e) {
+                        } catch (Exception e) {
                             // On attrape l'exception si l'enfant est cité deux fois
                             System.err.println("Attention (Doublon ignoré) : " + e.getMessage());
                         }

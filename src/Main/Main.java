@@ -20,13 +20,29 @@ public class Main {
             System.out.println("\nQu'elle est le nom du fichier ged (sans le ged)");
             System.out.println("Le fichier doit se trouver dans le dossier In");
             System.out.println("\n!!! Si vous voulez utilisez une sauvegarde déjà existante écrivez skip !!!");
-            String fileName = scanner.next() + ".ged";
+            String fileName = scanner.nextLine().trim();
+
+            if (fileName.isEmpty()) continue;
+
+            if (fileName.equalsIgnoreCase("skip")) {
+                System.out.println("Saut du chargement initial.");
+                break;
+            }
+
+            //J'AUTOMATISE POUR EVITER LES PB DE LECTURE
+            if(!fileName.endsWith(".ged") && !fileName.equalsIgnoreCase("skip")) {
+                fileName += ".ged";
+            }
+
             try {
-                if (fileName.equals("skip.ged")) {          //condition pour ne pas forcer prendre un nouveau fichier
-                    break;
-                }
                 System.out.println("Chargement de " + fileName + "...");            // tant que le fichier est pas trouvé on continue
                 graph = parser.parse(fileName);
+
+                if (graph != null) {
+                    List<String> rapport = graph.buildAndValidGraph();
+                    afficherRapport(rapport);
+                }
+
             } catch (Exception e) {
                 System.out.println("Pas de fichier trouvé.");
                 System.out.println("vérifié le nom du fichier mais aussi son emplacement.");
@@ -42,7 +58,7 @@ public class Main {
             if (input.isEmpty()) continue;
             String[] parts = input.split(" ", 2);
             String command = parts[0].toUpperCase();
-            String arg = (parts.length > 1) ? parts[1] : "";
+            String arg = (parts.length > 1) ? parts[1] : ""; //CA JLE VOIS EN BIZARRE
 
             try {
                 switch (command) {
@@ -100,8 +116,9 @@ public class Main {
 
                     case "LOAD":                              //Load 1 try
                         if (!arg.isEmpty()) {
+                            System.out.println("Chargement de la sauvegarde...");
                             graph = GedcomSerializer.load(arg);
-                            graph.buildAndValidGraph();
+                            System.out.println("Graphe chargé.");
                         }
                         else {
                             System.out.println("Erreur : précisez un nom de fichier.");
@@ -110,8 +127,17 @@ public class Main {
 
                     case "IMPORT":                                 // Pour changer de fichier GEDCOM
                         if (!arg.isEmpty()) {
-                            graph = parser.parse(arg);
-                            System.out.println("Nouveau fichier importé.");
+                            System.out.println("Lecture du nouveau fichier GEDCOM...");
+                            GedcomGraph newGraph = parser.parse(arg);
+
+                            if (newGraph != null) {
+                                graph = newGraph;
+                                List<String> rapport = graph.buildAndValidGraph();
+                                afficherRapport(rapport);
+                            }
+                        }
+                        else{
+                            System.out.println("Erreur : précisez un nom de fichier.");
                         }
                         break;
 
@@ -125,7 +151,7 @@ public class Main {
                         break;
 
                     default:
-                        System.out.println("Commande inconnue.");
+                        System.out.println("Commande inconnue. Tapez HELP");
                 }
             } catch (Exception e) {
                 System.out.println("Erreur durant l'opération : " + e.getMessage());                    //commande non reconnue
@@ -135,6 +161,19 @@ public class Main {
         System.out.println("Fermeture du programme.");
     }
 
+    //Va afficher les erreurs
+    private static void afficherRapport(List<String> rapport) {
+        if (rapport == null || rapport.isEmpty()) {
+            System.out.println(">> Graphe sain. Aucune incohérence détectée.");
+        } else {
+            System.out.println("\n/!\\ RAPPORT D'ANALYSE ET CORRECTION /!\\");
+            System.out.println("--------------------------------------------------");
+            for (String ligne : rapport) {
+                System.out.println(ligne);
+            }
+            System.out.println("--------------------------------------------------\n");
+        }
+    }
 
     private static void showInfo(GedcomGraph graph, String nom) throws NameNotFoundException {                       //Méthode pour la commande INFO
         Individu i = graph.searchByName(nom);

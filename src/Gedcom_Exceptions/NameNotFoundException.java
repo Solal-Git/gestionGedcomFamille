@@ -1,7 +1,8 @@
 package Gedcom_Exceptions;
 
+//SI LE NOM D'UNE REQUÊTE EST INTROUVABLE DANS LE GRAPHE
 public class NameNotFoundException extends GedcomNatException {
-    public NameNotFoundException(String nomRecherche) {
-        super("NameNotFoundError : L'individu avec le nom '" + nomRecherche + "' est introuvable dans le graphe.");
+    public NameNotFoundException(String message) {
+        super("NameNotFoundErr : " + message);
     }
 }

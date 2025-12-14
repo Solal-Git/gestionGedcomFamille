@@ -1,27 +1,14 @@
 package Gedcom_Exceptions;
 import java.io.Serializable;
 
+
+//Erreur Mère
 public class GedcomNatException extends Exception {
 
     private static final long serialVersionUID = 1L;        //Force la version du fichier utilise pour la sérialisation
 
-
-    public GedcomNatException() {
-        super();
-    }
-
     public GedcomNatException(String message) {
-        super("Gedcom Erreur :" + message);
+        super("GedcomNatErr-" + message);
     }
-
-    public GedcomNatException(String message, Throwable cause) {
-        super("Gedcom Erreur :" + message, cause);
-    }
-
-    public GedcomNatException(Throwable cause) {
-        super("Gedcom Erreur :" + cause);
-    }
-
-
 
 }

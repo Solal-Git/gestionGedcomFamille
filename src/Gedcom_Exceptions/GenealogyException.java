@@ -2,15 +2,16 @@ package Gedcom_Exceptions;
 
 import java.util.ArrayList;
 
-public class GenealogyException extends GedcomNatException {
-    private final ArrayList<String> CYCLE;
+//Erreur de cycle : un fils est son ancêtre
+public class GenealogyException extends LogicException {
+    private final ArrayList<String> cycle;
 
-    public GenealogyException(ArrayList<String> cycle, String message) {
-        this.CYCLE = cycle;
-        super("GenealogyError : Erreur généalogique, Il existe un CYCLE dans l'arbre" + message);
+    public GenealogyException(String message, ArrayList<String> cycle) {
+        this.cycle = cycle;
+        super("GenealogyErr : " + message);
     }
 
-    public ArrayList<String> getCYCLE() {
-        return CYCLE;
+    public ArrayList<String> getCycle() {
+        return cycle;
     }
 }
