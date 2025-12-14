@@ -21,7 +21,6 @@ public class Main {
             System.out.println("Le fichier doit se trouver dans le dossier In");
             System.out.println("\n!!! Si vous voulez utilisez une sauvegarde déjà existante écrivez skip !!!");
             String fileName = scanner.nextLine().trim();
-
             if (fileName.isEmpty()) continue;
 
             if (fileName.equalsIgnoreCase("skip")) {
@@ -118,11 +117,16 @@ public class Main {
                         if (!arg.isEmpty()) {
                             System.out.println("Chargement de la sauvegarde...");
                             graph = GedcomSerializer.load(arg);
+                            if (graph != null) {
+                                List<String> rapport = graph.buildAndValidGraph();
+                                afficherRapport(rapport);
+                            }
                             System.out.println("Graphe chargé.");
                         }
                         else {
                             System.out.println("Erreur : précisez un nom de fichier.");
                         }
+
                         break;
 
                     case "IMPORT":                                 // Pour changer de fichier GEDCOM
@@ -175,12 +179,14 @@ public class Main {
         }
     }
 
+    //Pour la commande INFO
     private static void showInfo(GedcomGraph graph, String nom) throws NameNotFoundException {                       //Méthode pour la commande INFO
         Individu i = graph.searchByName(nom);
         if (i != null) System.out.println("Résultat : " + i.toString());
         else System.out.println("Introuvable.");
     }
 
+    //Pour la commande SIBLINGS
     private static void showChild(GedcomGraph graph, String nom) throws NameNotFoundException {                      //méthode pour la commande CHILD
         Individu parent = graph.searchByName(nom);
         if (parent == null) { System.out.println("Introuvable."); return; }
@@ -195,8 +201,10 @@ public class Main {
         }
         if(!found) System.out.println("Aucun enfant.");
     }
+
+    //Pour la commande MARRIED
     private static void showSpouse(GedcomGraph graph, String nom) throws NameNotFoundException {                 //méthode pour la commande MARRIED
-        Individu i = graph.searchByName(nom);                                    // !!! Ajout possible d'une exception facile Andreas CHAUFFE toi pour la faire
+        Individu i = graph.searchByName(nom);
         if (i.getSexTag().toString().equals("M")) {
             List<String> fam = i.getFamsIds();
             for (String j : fam) {
@@ -214,6 +222,8 @@ public class Main {
             }
         }
     }
+
+    //Pour la commande FAMC
     private static void showChildFamilyInfo(GedcomGraph graph, String nom) throws NameNotFoundException {               //méthode pour la commande FAMC
         Individu i = graph.searchByName(nom);
         Famille famC = graph.getFamilly(i.getFamcId());
@@ -225,6 +235,7 @@ public class Main {
         System.out.println(famC.toString());
     }
 
+    //Affiche toutes les commandes
     private static void showCommand(){                                                      //méthode pour affichager les commandes
         System.out.println("\n===== SYSTEME DE GENEALOGIE =====");
         System.out.println("\n===== OPTION DE RECHERCHE =====");
@@ -232,7 +243,7 @@ public class Main {
         System.out.println(" ALL             : Info de toutes les personnes");
         System.out.println(" CHILD <Nom>     : Liste des enfants");
         System.out.println(" MARRIED <Nom>     : Donne le(a) conjoint(e)");
-        System.out.println(" FAMC <Nom>     : Informations sur sa famille");
+        System.out.println(" FAMC <Nom>     : Informations sur sa famille où il est renseigné en tant qu'enfant");
         System.out.println("\n===== OPTION DE GESTION =====");
         System.out.println(" SAVE <Fichier>  : Sauvegarder le graphe (.ser)");
         System.out.println(" LOAD <Fichier>  : Charger un graphe (.ser)");

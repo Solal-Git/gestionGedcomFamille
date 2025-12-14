@@ -189,21 +189,31 @@ public class GedcomGraph implements Serializable {
         for (String idFam : indiv.getFamsIds()) {
             Famille f = mapFamilles.get(idFam);
             if (f == null) {
-                // CORRECTION : Ajout du type "FAM" manquant dans ton code précédent
                 throw new RefMissingException("Famille propre " + idFam + " introuvable", idFam, "FAM");
             }
 
             indiv.addFamillePropreObj(f);
-            String sexe = (indiv.getSexTag() != null) ? indiv.getSexTag().toString() : "?";
+            String sexe;
+            if (indiv.getSexTag().toString() != "UNKNOW") {
+                sexe = indiv.getSexTag().toString();
+            } else {
+                sexe = "UNKNOW";
+            }
 
-            // Cas 1 : L'individu est listé comme le MARI
+            //Le sexe n'est pas renseigné
+            if (sexe == "UNKNOW") {
+                throw new GenderMissMatchException("L'individu" + indiv.getID() + "N'a pas de sexe déclaré on ne peut donc pas vérifier si c'est bon");
+            }
+
+            //Une épouse est déclarée en tant que mari
             if (indiv.getID().equals(f.getMariId())) {
                 if ("F".equals(sexe)) {
                     throw new GenderMissMatchException("Une FEMME (" +indiv.getID()+ ") est déclarée comme MARI dans " + f.getID());
                 }
                 f.setMariObj(indiv);
             }
-            // Cas 2 : L'individu est listé comme la FEMME
+
+            // un époux est déclaré en tant qu'épouse
             else if (indiv.getID().equals(f.getFemmeId())) {
                 if ("M".equals(sexe)) {
                     throw new GenderMissMatchException("Un HOMME ("+indiv.getID()+") est déclaré comme FEMME dans " + f.getID());
@@ -214,21 +224,16 @@ public class GedcomGraph implements Serializable {
     }
 
     public Individu searchByName(String recherche) throws NameNotFoundException {
-        // On passe tout en minuscules pour ne pas être gêné par la casse
         String rechercheLower = recherche.toLowerCase();
 
         for (Individu i : mapIndividus.values()) {
-            // Sécurité : On vérifie que l'individu a bien un tag NAME
-            if (i.getNameTag() != null) {
+            if (i.getNameTag().toString() != "UNKNOW") {
                 String fullName = i.getNameTag().toString().toLowerCase();
-
-                // .contains permet de trouver "Jean" si on tape juste "Je"
                 if (fullName.contains(rechercheLower)) {
                     return i;
                 }
             }
         }
-        // Si la boucle se termine sans résultat, on lance l'erreur
         throw new NameNotFoundException("L'individu avec le nom '" + recherche + "' est introuvable dans le graphe.");
     }
 

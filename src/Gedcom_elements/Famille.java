@@ -101,18 +101,21 @@ public class Famille extends GedcomEntity {
         if (mariObj != null && mariObj.getNameTag() != null) {
             sb.append(mariObj.getNameTag().toString());
         } else {
-            sb.append(HUSB != null ? HUSB : "Inconnu");
+            sb.append(HUSB != null ? HUSB : "UNKNOW");
         }
         sb.append("\n");
         sb.append(" Femme  : ");
         if (femmeObj != null && femmeObj.getNameTag() != null) {
             sb.append(femmeObj.getNameTag().toString());
         } else {
-            sb.append(WIFE != null ? WIFE : "Inconnue");
+            sb.append(WIFE != null ? WIFE : "UNKNOW");
         }
         sb.append("\n");
         if (dateMariage != null) {
-            sb.append(" Date   : ").append(dateMariage.toString()).append("\n");
+            sb.append(" Marriage   : ").append(dateMariage.toString()).append("\n");
+        }
+        else {
+            sb.append(" Marriage   : UNKONW  \n");
         }
         sb.append(" Enfants: ");
         if (enfantsObj != null && !enfantsObj.isEmpty()) {
@@ -130,6 +133,10 @@ public class Famille extends GedcomEntity {
         } else {
             sb.append("Aucun");
         }
+        if (multimediaTag != null){
+            sb.append("\n" + multimediaTag);
+        }
+        sb.append("\n");
         return sb.toString();
     }
 }

@@ -8,6 +8,7 @@ public class Individu extends GedcomEntity {
     private TagName nameTag;
     private TagSexe sexTag;
     private TagMultimedia multimediaTag;
+    private TagDate birthTag;
 
     private String famcId;
     private List<String> famsIds = new ArrayList<>();
@@ -18,6 +19,16 @@ public class Individu extends GedcomEntity {
     public Individu(String id) {
         super(0, "INDI", null, id);
     }
+
+    public TagDate getBirthTag() {
+        return birthTag;
+    }
+
+    public void setBirthTag(TagDate birthTag) {
+        this.birthTag = birthTag;
+    }
+
+    public void setBirthDate(String birthDate) {}
 
     public String getFamcId() {
         return famcId;
@@ -79,8 +90,28 @@ public class Individu extends GedcomEntity {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Individu [").append(ID).append("]: ");
-        if(nameTag != null) sb.append(nameTag);
-        else sb.append("Inconnu");
+        if(nameTag != null){
+            sb.append(nameTag);
+        }
+        else {
+            sb.append("UNKNOW");
+        }
+        if (sexTag != null){
+            sb.append("\n Sexe : " + sexTag);
+        }
+        else {
+            sb.append("\n Sexe : UNKNOW");
+        }
+        if (multimediaTag != null){
+            sb.append("\n" + multimediaTag);
+        }
+        if (birthTag != null){
+            sb.append("\n Naissance : " + birthTag);
+        }
+        else {
+            sb.append("\n Naissance : UNKNOW");
+        }
+        sb.append("\n");
         return sb.toString();
     }
 }

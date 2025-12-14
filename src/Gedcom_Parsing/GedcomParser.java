@@ -53,7 +53,8 @@ public class GedcomParser {
             if ("INDI".equals(line.tag)) {
                 currentIndividu = new Individu(line.id);
                 graph.addIndividual(currentIndividu);
-            } else if ("FAM".equals(line.tag)) {
+            }
+            else if ("FAM".equals(line.tag)) {
                 currentFamille = new Famille(line.id);
                 graph.addFamilly(currentFamille);
             }
@@ -70,7 +71,6 @@ public class GedcomParser {
                     case "SEX":
                         currentIndividu.setSex(new TagSexe(line.value)); break;
                     case "FAMC":
-                        //EXCEPTION ISALREADYCHILD GéRéE ICI
                         if (currentIndividu.getFamcId() != null) {
                             System.out.println("[ALERTE PARSER] IsAlreadyChildErr : L'individu "
                                     + currentIndividu.getID() + " a plusieurs parents (FAMC). "
@@ -80,6 +80,8 @@ public class GedcomParser {
                         break;
                     case "FAMS":
                         currentIndividu.addFamsId(line.value); break;
+                    case "BIRT" :
+                        break;
                     case "OBJE": // Début d'un bloc multimédia
                         currentMultimedia = new TagMultimedia();
                         currentIndividu.setMultimedia(currentMultimedia);
@@ -99,8 +101,10 @@ public class GedcomParser {
                     case "CHIL":
                         currentFamille.addEnfant(line.value);
                         break;
+
                     case "MARR":
                         break;
+
                     case "OBJE":
                         currentMultimedia = new TagMultimedia();
                         currentFamille.setMultimedia(currentMultimedia);
@@ -112,6 +116,12 @@ public class GedcomParser {
             if (currentFamille != null) {
                 if ("MARR".equals(lastTagLevel1) && "DATE".equals(line.tag)) {
                     currentFamille.setDateMariage(new TagDate(line.value));
+                }
+            }
+            if (currentIndividu != null) {
+                if ("BIRT".equals(lastTagLevel1) && "DATE".equals(line.tag)) {
+                    System.out.println(line.value);
+                    currentIndividu.setBirthTag(new TagDate(line.value));
                 }
             }
             if ("OBJE".equals(lastTagLevel1) && currentMultimedia != null) {
