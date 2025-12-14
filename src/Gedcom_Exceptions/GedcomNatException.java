@@ -3,7 +3,7 @@ import java.io.Serializable;
 
 public class GedcomNatException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;        //Force la version du fichier utilise pour la sérialisation
 
 
     public GedcomNatException() {

@@ -6,7 +6,7 @@ public class RefMissingException extends GedcomNatException {
     private String idManquant;
 
     public RefMissingException(String idManquant) {
-        super("Référence manquante détectée vers l'ID : " + idManquant);
+        super("RefMissingError : Référence manquante détectée vers l'ID : " + idManquant);
         this.idManquant = idManquant;
     }
 

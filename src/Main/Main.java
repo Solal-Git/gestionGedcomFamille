@@ -1,5 +1,6 @@
 package Main;
 
+import Gedcom_Exceptions.NameNotFoundException;
 import Gedcom_elements.*;
 import Gedcom_Parsing.*;
 
@@ -100,7 +101,7 @@ public class Main {
                     case "LOAD":                              //Load 1 try
                         if (!arg.isEmpty()) {
                             graph = GedcomSerializer.load(arg);
-                            graph.construireEtValiderGraphe();
+                            graph.buildAndValidGraph();
                         }
                         else {
                             System.out.println("Erreur : précisez un nom de fichier.");
@@ -135,14 +136,14 @@ public class Main {
     }
 
 
-    private static void showInfo(GedcomGraph graph, String nom) {                       //Méthode pour la commande INFO
-        Individu i = graph.rechercheParNom(nom);
+    private static void showInfo(GedcomGraph graph, String nom) throws NameNotFoundException {                       //Méthode pour la commande INFO
+        Individu i = graph.searchByName(nom);
         if (i != null) System.out.println("Résultat : " + i.toString());
         else System.out.println("Introuvable.");
     }
 
-    private static void showChild(GedcomGraph graph, String nom) {                      //méthode pour la commande CHILD
-        Individu parent = graph.rechercheParNom(nom);
+    private static void showChild(GedcomGraph graph, String nom) throws NameNotFoundException {                      //méthode pour la commande CHILD
+        Individu parent = graph.searchByName(nom);
         if (parent == null) { System.out.println("Introuvable."); return; }
 
         boolean found = false;
@@ -155,28 +156,33 @@ public class Main {
         }
         if(!found) System.out.println("Aucun enfant.");
     }
-    private static void showSpouse(GedcomGraph graph, String nom) {                 //méthode pour la commande MARRIED
-        Individu i = graph.rechercheParNom(nom);                                    // !!! Ajout possible d'une exception facile Andreas CHAUFFE toi pour la faire
+    private static void showSpouse(GedcomGraph graph, String nom) throws NameNotFoundException {                 //méthode pour la commande MARRIED
+        Individu i = graph.searchByName(nom);                                    // !!! Ajout possible d'une exception facile Andreas CHAUFFE toi pour la faire
         if (i.getSexTag().toString().equals("M")) {
             List<String> fam = i.getFamsIds();
             for (String j : fam) {
-                Famille famS =(graph.getFamille(j));
+                Famille famS =(graph.getFamilly(j));
                 String stringWife = famS.getFemmeId();
-                System.out.println(graph.getIndividu(stringWife).toString());
+                System.out.println(graph.getIndividual(stringWife).toString());
             }
         }
         if (i.getSexTag().toString().equals("F")) {
             List<String> fam = i.getFamsIds();
             for (String j : fam) {
-                Famille famS =(graph.getFamille(j));
+                Famille famS =(graph.getFamilly(j));
                 String stringHusband = famS.getMariId();
-                System.out.println(graph.getIndividu(stringHusband).toString());
+                System.out.println(graph.getIndividual(stringHusband).toString());
             }
         }
     }
-    private static void showChildFamilyInfo(GedcomGraph graph, String nom) {               //méthode pour la commande FAMC
-        Individu i = graph.rechercheParNom(nom);
-        Famille famC = graph.getFamille(i.getFamcId());
+    private static void showChildFamilyInfo(GedcomGraph graph, String nom) throws NameNotFoundException {               //méthode pour la commande FAMC
+        Individu i = graph.searchByName(nom);
+        Famille famC = graph.getFamilly(i.getFamcId());
+        System.out.println(famC.getFemmeId());
+        if (famC == null) {
+            System.out.println("Erreur, cette personne n'a pas de famille où il est renseigné comme enfant eregistré");
+            return;
+        }
         System.out.println(famC.toString());
     }
 

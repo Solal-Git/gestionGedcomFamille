@@ -8,6 +8,6 @@ public class TwiceChildException extends GedcomNatException {
     }
 
     public TwiceChildException(String message, Throwable cause) {
-        super("Erreur deux fois un enfant : " + message, cause);
+        super("TwiceChildError : Erreur deux fois un enfant : " + message, cause);
     }
 }

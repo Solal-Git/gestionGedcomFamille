@@ -1,20 +1,19 @@
 package Gedcom_Exceptions;
-import java.io.Serializable;
 
 public class LinkIncoherentException extends GedcomNatException {
-    private final String linkIdfrom;                  //Lien de A vers B existant
-    private final String linkIdMissing;               //Lien de B vers A manquant
+    private final String LINKIDFROM;                  //Lien de A vers B existant
+    private final String LINKIDMISSING;               //Lien de B vers A manquant
 
     public LinkIncoherentException(String message, String linkIdfrom, String linkIdmissing) {
-        super(message);
-        this.linkIdfrom = linkIdfrom;
-        this.linkIdMissing = linkIdmissing;
+        super("LinkIncoherentError :" + message);
+        this.LINKIDFROM = linkIdfrom;
+        this.LINKIDMISSING = linkIdmissing;
     }
 
     public String getLinkIdFrom() {
-        return linkIdfrom;
+        return LINKIDFROM;
     }
-    public String getLinkIdMissing() {
-        return linkIdMissing;
+    public String getLINKIDMISSING() {
+        return LINKIDMISSING;
     }
 }

@@ -3,17 +3,17 @@ package Gedcom_elements;
 import Gedcom_Tag.TagMultimedia;
 import java.util.ArrayList;
 import java.util.List;
+import Gedcom_Tag.TagDate;
 import Gedcom_Exceptions.*;
 
 public class Famille extends GedcomEntity {
 
-    // Parsing (Strings)
     private String HUSB;
     private String WIFE;
     private List<String> CHIL;
+    private TagDate dateMariage;
     private TagMultimedia multimediaTag;
 
-    // Graphe (Objets réels à AJOUTER)
     private transient Individu mariObj;
     private transient Individu femmeObj;
     private transient List<Individu> enfantsObj;
@@ -22,13 +22,18 @@ public class Famille extends GedcomEntity {
         super(0, "FAM", null, id);
         this.CHIL = new ArrayList<>();
         this.enfantsObj = new ArrayList<>();
-        this.HUSB = null; // Mieux vaut null que "" pour détecter l'absence
+        this.HUSB = null;
         this.WIFE = null;
     }
 
-    // ... Tes setters existants ...
+    public void setDateMariage(TagDate date) {
+        this.dateMariage = date;
+    }
 
-    // --- AJOUTER CES GETTERS (Indispensable) ---
+    public TagDate getDateMariage() {
+        return this.dateMariage;
+    }
+
     public String getMariId() {
         return HUSB;
     }
@@ -41,7 +46,6 @@ public class Famille extends GedcomEntity {
         return CHIL;
     }
 
-    // --- AJOUTER CES MÉTHODES DE LIAISON ---
     public void setMariObj(Individu i) {
         this.mariObj = i;
     }
@@ -72,7 +76,6 @@ public class Famille extends GedcomEntity {
         return this.enfantsObj;
     }
 
-    // ... Reste de ta classe ...
     public void setMari(String id) {
         this.HUSB = id;
     }
@@ -94,6 +97,41 @@ public class Famille extends GedcomEntity {
 
     @Override
     public String toString() {
-        return "Famille " + ID +"\n" +" "+ HUSB +" "+ WIFE +" "+ CHIL;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Famille ").append(ID).append("\n");
+        sb.append(" Mari   : ");
+        if (mariObj != null && mariObj.getNameTag() != null) {
+            sb.append(mariObj.getNameTag().toString());
+        } else {
+            sb.append(HUSB != null ? HUSB : "Inconnu");
+        }
+        sb.append("\n");
+        sb.append(" Femme  : ");
+        if (femmeObj != null && femmeObj.getNameTag() != null) {
+            sb.append(femmeObj.getNameTag().toString());
+        } else {
+            sb.append(WIFE != null ? WIFE : "Inconnue");
+        }
+        sb.append("\n");
+        if (dateMariage != null) {
+            sb.append(" Date   : ").append(dateMariage.toString()).append("\n");
+        }
+        sb.append(" Enfants: ");
+        if (enfantsObj != null && !enfantsObj.isEmpty()) {
+            boolean premier = true;
+            for (Individu enf : enfantsObj) {
+                if (!premier) sb.append(", ");
+
+                if (enf.getNameTag() != null) {
+                    sb.append(enf.getNameTag().toString());
+                } else {
+                    sb.append(enf.getID());
+                }
+                premier = false;
+            }
+        } else {
+            sb.append("Aucun");
+        }
+        return sb.toString();
     }
 }

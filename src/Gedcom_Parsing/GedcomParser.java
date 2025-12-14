@@ -1,6 +1,8 @@
 package Gedcom_Parsing;
 
+import Gedcom_Exceptions.GenderMissMatchException;
 import Gedcom_Exceptions.GenealogyException;
+import Gedcom_Exceptions.RefMissingException;
 import Gedcom_Exceptions.TwiceChildException;
 import Gedcom_elements.*;
 import Gedcom_Tag.*;
@@ -19,7 +21,7 @@ public class GedcomParser {
         graph = new GedcomGraph();
     }
 
-    public GedcomGraph parse(String filePath) throws IOException, TwiceChildException, GenealogyException {
+    public GedcomGraph parse(String filePath) throws IOException, TwiceChildException, GenealogyException, GenderMissMatchException, RefMissingException {
         //J'AI MIS LES 2 POUR DEBUG LE LOAD ET LE IMPORT
         if (!filePath.equals("In/" + filePath)) {
             filePath = "In/" + filePath;
@@ -37,7 +39,7 @@ public class GedcomParser {
             }
         }
 
-        graph.construireEtValiderGraphe();
+        graph.buildAndValidGraph();
 
         return graph;
     }
@@ -50,10 +52,10 @@ public class GedcomParser {
 
             if ("INDI".equals(line.tag)) {
                 currentIndividu = new Individu(line.id);
-                graph.ajouterIndividu(currentIndividu);
+                graph.addIndividual(currentIndividu);
             } else if ("FAM".equals(line.tag)) {
                 currentFamille = new Famille(line.id);
-                graph.ajouterFamille(currentFamille);
+                graph.addFamilly(currentFamille);
             }
         }
 
@@ -67,7 +69,6 @@ public class GedcomParser {
                     case "SEX":  currentIndividu.setSex(new TagSexe(line.value)); break;
                     case "FAMC": currentIndividu.setFamcId(line.value); break;
                     case "FAMS": currentIndividu.addFamsId(line.value); break;
-
                     case "OBJE": // Début d'un bloc multimédia
                         currentMultimedia = new TagMultimedia();
                         currentIndividu.setMultimedia(currentMultimedia);
@@ -86,14 +87,14 @@ public class GedcomParser {
 
                     case "CHIL":
                         try {
-                            // C'EST LA LIGNE CRUCIALE QUI MANQUAIT !
                             currentFamille.addEnfant(line.value);
                         } catch (TwiceChildException e) {
                             // On attrape l'exception si l'enfant est cité deux fois
                             System.err.println("Attention (Doublon ignoré) : " + e.getMessage());
                         }
                         break;
-
+                    case "MARR":
+                        break;
                     case "OBJE":
                         currentMultimedia = new TagMultimedia();
                         currentFamille.setMultimedia(currentMultimedia);
@@ -101,25 +102,17 @@ public class GedcomParser {
                 }
             }
         }
-
-        // --- NIVEAU 2 (C'est ici qu'on gère DATE et FICHIERS) ---
         else if (line.level == 2) {
-            if (currentIndividu != null) {
-
-                // Si le niveau 1 précédent était une Naissance (BIRT)
-                if ("BIRT".equals(lastTagLevel1) && "DATE".equals(line.tag)) {
-                    // Tu peux ajouter une propriété TagDate à l'individu
-                    // currentIndividu.addPropriete(new TagDate(line.value));
-                    // (Ou créer un champ spécifique 'dateNaissance' dans Individu)
+            if (currentFamille != null) {
+                if ("MARR".equals(lastTagLevel1) && "DATE".equals(line.tag)) {
+                    currentFamille.setDateMariage(new TagDate(line.value));
                 }
-
-                // Si le niveau 1 précédent était un Objet Multimédia (OBJE)
-                if ("OBJE".equals(lastTagLevel1) && currentMultimedia != null) {
-                    switch (line.tag) {
-                        case "FILE": currentMultimedia.setFichier(line.value); break;
-                        case "TITL": currentMultimedia.setTitre(line.value); break;
-                        case "FORM": currentMultimedia.setFormat(line.value); break;
-                    }
+            }
+            if ("OBJE".equals(lastTagLevel1) && currentMultimedia != null) {
+                switch (line.tag) {
+                    case "FILE": currentMultimedia.setFichier(line.value); break;
+                    case "TITL": currentMultimedia.setTitre(line.value); break;
+                    case "FORM": currentMultimedia.setFormat(line.value); break;
                 }
             }
         }
